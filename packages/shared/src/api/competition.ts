@@ -73,3 +73,11 @@ export const AdminContestRow = z.object({
 })
 export const AdminContestListResponse = z.object({ items: z.array(AdminContestRow) })
 export const AddContestProblemBody = z.object({ problemSlug: z.string() })
+
+export const ContestProblemSchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  points: z.number().int(),
+  orderIndex: z.number().int(),
+})
+export const ContestProblemsResponse = z.object({ items: z.array(ContestProblemSchema) })

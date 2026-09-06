@@ -75,3 +75,8 @@ detail check was not.
 `Problem` has both an `author_id` and a `writer_id`, and they are routinely
 different people — the profile page lists "authored" and "written" separately.
 Treating them as one field silently drops credit from half the catalogue.
+
+
+## Gotcha: legacy rated fewer than the scoreboard shows
+
+Some contests recorded rating_change rows for FEWER contestants than actually scored (e.g. iiylo: 270 registrants scored, 231 rated). Legacy excluded certain scored participants from the rated set. A golden replay that compares the rebuilt *scoreboard* rank to the legacy *rating* rank will therefore show a systematic +1 shift below any excluded row — that is a rating-population difference, NOT a scoring bug (points and rating history reproduce exactly). Compare within the rated population, or expect these offsets.

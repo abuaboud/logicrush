@@ -1,6 +1,6 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
-import { ContestDetailSchema, ContestListQuery, ContestListResponse, ScoreboardResponse } from '@logicrush/shared'
+import { ContestDetailSchema, ContestListQuery, ContestListResponse, ContestProblemsResponse, ScoreboardResponse } from '@logicrush/shared'
 import { optionalUser, requireUser } from '../../identity/auth/security.js'
 import { contestService } from './contest-service.js'
 import { scoreboardService } from '../scoreboard/scoreboard-service.js'
@@ -39,7 +39,7 @@ const ListRequest = {
   schema: { querystring: ContestListQuery, response: { 200: ContestListResponse } },
 }
 const GetRequest = { config: PUBLIC, schema: { params: SlugParams, response: { 200: ContestDetailSchema } } }
-const ProblemsRequest = { config: AUTH, schema: { params: SlugParams } }
+const ProblemsRequest = { config: AUTH, schema: { params: SlugParams, response: { 200: ContestProblemsResponse } } }
 const RegisterRequest = { config: AUTH, schema: { params: SlugParams } }
 const ScoreboardRequest = { config: PUBLIC, schema: { params: SlugParams, response: { 200: ScoreboardResponse } } }
 const RatingRunRequest = { config: ADMIN, schema: { params: SlugParams } }

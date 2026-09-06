@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { ContestListResponse } from '@logicrush/shared'
+import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { Card, CardHeader, CardBody } from '@/components/ui/card'
 import { DataTable, Th, Td } from '@/components/ui/table'
@@ -20,7 +21,7 @@ function Section({ title, state }: { title: string; state: 'active' | 'upcoming'
           <DataTable head={<><Th>اسم المسابقة</Th><Th>وقت البدء</Th><Th className="text-end">مدة المسابقة</Th></>}>
             {items.map((c) => (
               <tr key={c.slug}>
-                <Td>{c.title}</Td>
+                <Td><Link to={`/contest/${c.slug}/dashboard`} className="text-brand-light hover:underline">{c.title}</Link></Td>
                 <Td className="tabular-nums">{new Date(c.startsAt).toLocaleString('ar')}</Td>
                 <Td className="text-end">{c.lengthMinutes} دقيقة</Td>
               </tr>

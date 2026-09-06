@@ -12,6 +12,7 @@ import { ProblemRoute } from './routes/ProblemRoute.js'
 import { LeaderboardRoute } from './routes/LeaderboardRoute.js'
 import { ContestsRoute } from './routes/ContestsRoute.js'
 import { ScoreboardRoute } from './routes/ScoreboardRoute.js'
+import { ContestDashboardRoute } from './routes/ContestDashboardRoute.js'
 import { SubmissionsRoute } from './routes/SubmissionsRoute.js'
 import { ProfileRoute } from './routes/ProfileRoute.js'
 import { ForumRoute } from './routes/ForumRoute.js'
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
   { path: '/problemset/tag/:tag/page/:page', element: w(<ProblemsetRoute />) },
   { path: '/problem/:slug', element: w(<ProblemRoute />) },
   { path: '/contests', element: w(<ContestsRoute />) },
+  { path: '/contest/:slug/dashboard', element: w(<ContestDashboardRoute />) },
   { path: '/contest/:slug/scoreboard', element: <Navigate to="scoreboard/page/1" replace /> },
   { path: '/contest/:slug/scoreboard/page/:page', element: w(<ScoreboardRoute />) },
   { path: '/leaderboard', element: <Navigate to="/leaderboard/page/1" replace /> },

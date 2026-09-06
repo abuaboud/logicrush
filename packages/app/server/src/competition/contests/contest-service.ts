@@ -112,7 +112,7 @@ export const contestService = {
       throw new AppError({ code: ErrorCode.FORBIDDEN, params: { reason: 'not_registered' } })
     }
 
-    return databaseService
+    const rows = await databaseService
       .db()
       .selectFrom('problem')
       .select(['slug', 'title', 'points', 'order_index'])
@@ -120,6 +120,7 @@ export const contestService = {
       .where('visibility', '!=', 'deleted')
       .orderBy('order_index', 'asc')
       .execute()
+    return rows.map((r) => ({ slug: r.slug, title: r.title, points: r.points, orderIndex: r.order_index }))
   },
 }
 
