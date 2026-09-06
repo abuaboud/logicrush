@@ -7,7 +7,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
-import { AppError } from '@logicrush/shared'
+import { AppError, ErrorCode } from '@logicrush/shared'
 import { configs } from './configs.js'
 import { databaseService } from './infra/database.js'
 
@@ -21,12 +21,17 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(cookie, { secret: configs.authSecret })
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' })
 
-  app.setErrorHandler((error, _request, reply) => {
+  // One place turns a thrown value into a response. AppError carries its own
+  // status; Fastify's own 4xx (schema validation) passes through; anything else
+  // is a bug and is logged, never echoed to the client.
+  app.setErrorHandler((error: unknown, _request, reply) => {
     if (error instanceof AppError) {
       return reply.status(error.status).send({ code: error.code, params: error.params })
     }
-    if (error.statusCode !== undefined && error.statusCode < 500) {
-      return reply.status(error.statusCode).send({ code: 'VALIDATION', message: error.message })
+    const status = (error as { statusCode?: number }).statusCode
+    if (status !== undefined && status < 500) {
+      const message = error instanceof Error ? error.message : 'Invalid request'
+      return reply.status(status).send({ code: ErrorCode.VALIDATION, message })
     }
     app.log.error(error)
     return reply.status(500).send({ code: 'INTERNAL' })

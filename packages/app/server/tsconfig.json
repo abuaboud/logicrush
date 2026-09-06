@@ -5,8 +5,14 @@
     "rootDir": "src",
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
-    "lib": ["ES2023"],
-    "types": ["node"]
+    "lib": [
+      "ES2023"
+    ],
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src", "tests"]
+  "include": [
+    "src"
+  ]
 }
