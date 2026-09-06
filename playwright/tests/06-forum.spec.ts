@@ -8,7 +8,7 @@ test.describe('Journey 6 — forum comment and vote', () => {
     await page.getByLabel('اسم المستخدم').fill('demo')
     await page.getByLabel('كلمة المرور').fill('password123')
     await page.getByRole('button', { name: 'دخول' }).click()
-    await expect(page.getByRole('link', { name: 'demo' })).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'demo' })).toBeVisible()
 
     // find the announcement blog id via the API, open it, comment
     const list = await (await page.request.get('/api/blogs?category=announcements')).json()

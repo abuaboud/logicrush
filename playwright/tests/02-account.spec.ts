@@ -11,11 +11,11 @@ test.describe('Journey 2 — register, sign in, stay signed in', () => {
     await page.getByLabel('كلمة المرور').fill('correct-horse-1')
     await page.getByRole('button', { name: 'تسجيل' }).click()
     // lands home, navbar shows the username + logout
-    await expect(page.getByRole('link', { name: u })).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('link', { name: u })).toBeVisible()
     await expect(page.getByRole('button', { name: 'خروج' })).toBeVisible()
     // survives a reload
     await page.reload()
-    await expect(page.getByRole('link', { name: u })).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('link', { name: u })).toBeVisible()
   })
 
   test('sign in as a seeded user and sign out', async ({ page }) => {
@@ -23,7 +23,7 @@ test.describe('Journey 2 — register, sign in, stay signed in', () => {
     await page.getByLabel('اسم المستخدم').fill('demo')
     await page.getByLabel('كلمة المرور').fill('password123')
     await page.getByRole('button', { name: 'دخول' }).click()
-    await expect(page.getByRole('link', { name: 'demo' })).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'demo' })).toBeVisible()
     await page.getByRole('button', { name: 'خروج' }).click()
     await expect(page.getByRole('link', { name: 'تسجيل الدخول' })).toBeVisible()
   })
