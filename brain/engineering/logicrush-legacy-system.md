@@ -63,6 +63,15 @@ sending (`RequestLogin.isHashPassword`).
 author's* `contribution_points` by ±1 on a new vote and ±2 on a flip. Nothing else
 writes them.
 
+**Contest problems are separate `problem` rows.** A contest's problems are cloned
+as their own rows with `contest_id` set. Two consequences a rebuild must handle or
+it leaks: the public practice problemset must exclude `contest_id IS NOT NULL`
+(or the same problem appears twice), and the practice *detail* endpoint must 404
+a contest-bound problem for non-staff — otherwise an active contest's problems are
+readable by guessing the slug, outside the start-time and registration gate. An
+independent QA pass caught exactly this after the list filter was added but the
+detail check was not.
+
 `Problem` has both an `author_id` and a `writer_id`, and they are routinely
 different people — the profile page lists "authored" and "written" separately.
 Treating them as one field silently drops credit from half the catalogue.
