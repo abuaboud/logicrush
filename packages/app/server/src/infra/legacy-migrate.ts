@@ -50,6 +50,16 @@ async function preloadIdMaps(): Promise<void> {
   }
 }
 
+// Legacy uses author_id/writer_id = 0 as a "system / unknown" sentinel (there is
+// no user 0), and a few rows reference since-deleted users. Rather than drop the
+// content, attribute it to a seeded system user so contests/problems and
+// everything hanging off them survive the migration.
+const SYSTEM_LEGACY_ID = 0
+function systemUserId(): string { return mapId('user', SYSTEM_LEGACY_ID) }
+function refUserOrSystem(legacyId: number | null): string {
+  return refId('user', legacyId) ?? systemUserId()
+}
+
 let DRY = false
 const stats: Record<string, number> = {}
 const rejects: string[] = []
@@ -119,16 +129,32 @@ async function loadRevisions(src: mysql.Connection): Promise<Map<number, string>
 }
 
 async function migrateUsers(src: mysql.Connection) {
+  // Seed the system user (legacy_id 0) for orphaned author/writer references.
+  await upsert('user', SYSTEM_LEGACY_ID, {
+    id: systemUserId(), legacy_id: SYSTEM_LEGACY_ID, username: 'logicrush.system', full_name: 'LogicRush',
+    email: 'system.migrated@logicrush.com', password_hash: null, role: 'admin', rating: 0, contribution_points: 0,
+    country_code: null, gender: 'unspecified', birthday: null, img_url: null, email_validated: true,
+    registered_at: new Date('2018-01-01T00:00:00Z'), last_online_at: null,
+  })
   // countries first (referenced by user.country_code)
   for (const c of await rows(src, 'SELECT code, name FROM country').catch(() => [])) {
     if (!DRY) await databaseService.db().insertInto('country').values({ code: c.code, name: c.name })
       .onConflict((oc) => oc.column('code').doNothing()).execute()
   }
+  // Legacy allowed usernames/emails that differ only by case; our schema enforces
+  // case-insensitive uniqueness, so disambiguate the later of any collision by
+  // suffixing with the legacy id. The system user's values are reserved first.
+  const seenUser = new Set<string>(['logicrush.system'])
+  const seenEmail = new Set<string>(['system.migrated@logicrush.com'])
   for (const u of await rows(src, 'SELECT * FROM user')) {
     const cc = typeof u.country_code === 'string' && u.country_code.length === 2 ? u.country_code : null
+    let username = u.user, email = u.email
+    if (seenUser.has(String(username).toLowerCase())) { username = `${username}-${u.id}`; rejects.push(`user ${u.id}: username collision, renamed to ${username}`) }
+    if (seenEmail.has(String(email).toLowerCase())) { email = `${u.id}+${email}`; rejects.push(`user ${u.id}: email collision, renamed`) }
+    seenUser.add(String(username).toLowerCase()); seenEmail.add(String(email).toLowerCase())
     await upsert('user', u.id, {
-      id: mapId('user', u.id), legacy_id: u.id, username: u.user, full_name: u.full_name ?? '',
-      email: u.email, password_hash: u.password ? password.fromLegacyMd5(u.password) : null,
+      id: mapId('user', u.id), legacy_id: u.id, username, full_name: u.full_name ?? '',
+      email, password_hash: u.password ? password.fromLegacyMd5(u.password) : null,
       role: role(u.privilege), rating: u.rating ?? 0, contribution_points: u.contribution_points ?? 0,
       country_code: cc, gender: gender(u.gender), birthday: u.birthday ? ts(u.birthday).toISOString().slice(0, 10) : null,
       img_url: rewriteAsset(u.img_url), email_validated: !!u.validated_email,
@@ -145,8 +171,7 @@ async function migrateTags(src: mysql.Connection) {
 
 async function migrateContests(src: mysql.Connection) {
   for (const c of await rows(src, 'SELECT * FROM contest')) {
-    const author = refId('user', c.author_id)
-    if (author === null) { rejects.push(`contest ${c.id}: missing author ${c.author_id}`); continue }
+    const author = refUserOrSystem(c.author_id)
     await upsert('contest', c.id, {
       id: mapId('contest', c.id), legacy_id: c.id, slug: c.contest_key, title: c.title, author_id: author,
       starts_at: ts(c.start_timestamp), length_minutes: c.length, allowed_attempts: 3, visibility: vis(c.visibility),
@@ -157,8 +182,7 @@ async function migrateContests(src: mysql.Connection) {
 
 async function migrateProblems(src: mysql.Connection, rev: Map<number, string>) {
   for (const p of await rows(src, 'SELECT * FROM problem')) {
-    const author = refId('user', p.author_id), writer = refId('user', p.writer_id)
-    if (author === null || writer === null) { rejects.push(`problem ${p.id}: missing author/writer`); continue }
+    const author = refUserOrSystem(p.author_id), writer = refUserOrSystem(p.writer_id)
     await upsert('problem', p.id, {
       id: mapId('problem', p.id), legacy_id: p.id, slug: p.problem_key, title: p.title, type: ptype(p.type),
       author_id: author, writer_id: writer,
@@ -194,8 +218,9 @@ async function migrateProblemTags(src: mysql.Connection) {
 
 async function migrateRegistrations(src: mysql.Connection) {
   for (const r of await rows(src, 'SELECT * FROM contest_register')) {
-    const cid = refId('contest', r.contest_id), uid = refId('user', r.user_id)
-    if (cid === null || uid === null) { rejects.push(`registration ${r.id}: missing contest/user`); continue }
+    const cid = refId('contest', r.contest_id)
+    if (cid === null) { rejects.push(`registration ${r.id}: missing contest ${r.contest_id}`); continue }
+    const uid = refUserOrSystem(r.user_id)
     stats.contest_register = (stats.contest_register ?? 0) + 1
     if (!DRY) await databaseService.db().insertInto('contest_register')
       .values({ contest_id: cid, user_id: uid, registered_at: new Date() })
@@ -205,8 +230,9 @@ async function migrateRegistrations(src: mysql.Connection) {
 
 async function migrateSubmissions(src: mysql.Connection) {
   for (const s of await rows(src, 'SELECT * FROM submission')) {
-    const uid = refId('user', s.user_id), pid = refId('problem', s.problem_id)
-    if (uid === null || pid === null) { rejects.push(`submission ${s.id}: missing user/problem`); continue }
+    const pid = refId('problem', s.problem_id)
+    if (pid === null) { rejects.push(`submission ${s.id}: missing problem ${s.problem_id}`); continue }
+    const uid = refUserOrSystem(s.user_id)
     await upsert('submission', s.id, {
       id: mapId('submission', s.id), legacy_id: s.id, user_id: uid, problem_id: pid, answer: s.answer ?? '',
       correct: !!s.correct, blind: !!s.blind, submitted_at: ts(s.timestamp),
@@ -216,8 +242,9 @@ async function migrateSubmissions(src: mysql.Connection) {
 
 async function migrateRatingChanges(src: mysql.Connection) {
   for (const rc of await rows(src, 'SELECT * FROM rating_change ORDER BY id')) {
-    const uid = refId('user', rc.user_id), cid = refId('contest', rc.contest_id)
-    if (uid === null || cid === null) { rejects.push(`rating_change ${rc.id}: missing user/contest`); continue }
+    const cid = refId('contest', rc.contest_id)
+    if (cid === null) { rejects.push(`rating_change ${rc.id}: missing contest ${rc.contest_id}`); continue }
+    const uid = refUserOrSystem(rc.user_id)
     await upsert('rating_change', rc.id, {
       id: mapId('rating_change', rc.id), legacy_id: rc.id, user_id: uid, contest_id: cid,
       rank: rc.rank, new_rating: rc.new_rating,
@@ -237,8 +264,9 @@ async function migrateForum(src: mysql.Connection, rev: Map<number, string>) {
     })
   }
   for (const b of await rows(src, 'SELECT * FROM blog')) {
-    const author = refId('user', b.author_id), cat = refId('blog_category', b.category_id)
-    if (author === null || cat === null) { rejects.push(`blog ${b.id}: missing author/category`); continue }
+    const cat = refId('blog_category', b.category_id)
+    if (cat === null) { rejects.push(`blog ${b.id}: missing category ${b.category_id}`); continue }
+    const author = refUserOrSystem(b.author_id)
     await upsert('blog', b.id, {
       id: mapId('blog', b.id), legacy_id: b.id, title: b.title, content: rewriteAsset(rev.get(b.content_rev_id) ?? ''),
       author_id: author, category_id: cat, visibility: vis(b.visibility), announcement: !!b.announcement,
@@ -262,8 +290,8 @@ async function migrateComments(src: mysql.Connection, rev: Map<number, string>) 
     const t = target.get(c.id)
     if (t === undefined) { rejects.push(`comment ${c.id}: no target join`); continue }
     const targetId = refId(t.targetTable, t.legacyTargetId)
-    const author = refId('user', c.author_id)
-    if (targetId === null || author === null) { rejects.push(`comment ${c.id}: missing target/author`); continue }
+    if (targetId === null) { rejects.push(`comment ${c.id}: missing target`); continue }
+    const author = refUserOrSystem(c.author_id)
     await upsert('comment', c.id, {
       id: mapId('comment', c.id), legacy_id: c.id, target: t.target, target_id: targetId,
       parent_id: c.parent_id ? refId('comment', c.parent_id) : null, author_id: author,
