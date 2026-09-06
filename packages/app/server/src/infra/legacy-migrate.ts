@@ -66,6 +66,7 @@ const rejects: string[] = []
 
 export const legacyMigrate = {
   async run({ only }: { only?: string[] } = {}): Promise<{ stats: Record<string, number>; rejects: string[] }> {
+    await databaseService.connect()
     const url = env.get('LEGACY_MYSQL_URL').required().asString()
     const src = await mysql.createConnection(url + (url.includes('?') ? '&' : '?') + 'timezone=Z')
     try {

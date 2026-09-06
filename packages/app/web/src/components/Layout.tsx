@@ -36,7 +36,7 @@ function NotificationBell() {
 export function Layout({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth()
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <nav className="bg-ink text-header-foreground">
         <div className="flex items-center justify-between px-8 py-4">
           {/* nav first → renders at the RIGHT in RTL */}
@@ -69,7 +69,7 @@ export function Layout({ children }: { children: ReactNode }) {
         className="h-[68px] bg-brand bg-cover bg-center"
         style={{ backgroundImage: "url('/hero-pattern.svg')" }}
       />
-      <main className="mx-auto max-w-6xl px-6 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-6">{children}</main>
       <footer className="bg-ink text-header-foreground mt-12 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-6 text-sm opacity-80">
           <img src="/logo-yellow.png" alt="LogicRush" className="h-7 w-auto" />

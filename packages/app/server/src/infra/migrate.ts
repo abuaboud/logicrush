@@ -17,12 +17,14 @@ const provider: MigrationProvider = {
 
 export const migrations = {
   async up(): Promise<void> {
+    await databaseService.connect()
     const migrator = new Migrator({ db: databaseService.db(), provider })
     const { error, results } = await migrator.migrateToLatest()
     report(results, error)
   },
 
   async down(): Promise<void> {
+    await databaseService.connect()
     const migrator = new Migrator({ db: databaseService.db(), provider })
     const { error, results } = await migrator.migrateDown()
     report(results, error)

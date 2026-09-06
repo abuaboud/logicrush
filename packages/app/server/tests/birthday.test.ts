@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { formatUser } from '../src/identity/auth/auth-service.js'
+
+process.env.AUTH_SECRET ??= 'test-secret'
+const { formatUser } = await import('../src/identity/auth/auth-service.js')
 
 // Regression: a Postgres `date` column returns a Date object, and legacy data
 // has zero-dates / out-of-range birthdays. formatUser must emit a valid

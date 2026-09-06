@@ -8,6 +8,7 @@ import { password } from '../identity/auth/password.js'
 // Idempotent: keyed on slugs/usernames, safe to re-run.
 export const seed = {
   async run(): Promise<void> {
+    await databaseService.connect()
     const db = databaseService.db()
     const pw = await password.hash('password123')
 
