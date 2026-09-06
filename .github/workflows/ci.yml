@@ -23,14 +23,11 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      # E2E: seed and the dev server run from different cwds, so the PGlite data
-      # dir must be an absolute path they both open (sequentially -- PGlite is
-      # single-connection).
-      - run: npm run test:e2e:seed
-        env:
-          PGLITE_DATA_DIR: /tmp/lr-e2e-pgdata
+      # E2E: the server seeds its own in-memory PGlite on boot (E2E_SEED=1), so
+      # there is no separate seed step and no data dir to hand off between
+      # processes -- the whole run lives in the one dev-server process.
       - run: npm run test:e2e
         env:
-          PGLITE_DATA_DIR: /tmp/lr-e2e-pgdata
+          E2E_SEED: '1'
           AUTH_SECRET: ci-secret
           NODE_ENV: test

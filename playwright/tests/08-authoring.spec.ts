@@ -14,7 +14,7 @@ test.describe('Journey 8 — author a contest', () => {
     await page.getByLabel('اسم المستخدم').fill('superjava')
     await page.getByLabel('كلمة المرور').fill('password123')
     await page.getByRole('button', { name: 'دخول' }).click()
-    await expect(page.getByRole('link', { name: 'superjava' })).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'superjava' })).toBeVisible()
 
     const slug = 'e2e-authored-' + Date.now()
     await page.goto('/contests/dashboard')

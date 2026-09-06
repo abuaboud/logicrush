@@ -32,11 +32,14 @@ export default defineConfig({
     },
     {
       // The site is mobile-heavy and RTL; a desktop-only suite misses layout
-      // regressions that only show at narrow widths.
+      // regressions that only show at narrow widths. Mobile runs the read-only
+      // browse journey (layout coverage) -- the stateful solve flow is covered on
+      // chromium; running it here too would mutate the shared seeded DB (the demo
+      // user can only solve a problem once) and collide with the chromium run.
       name: 'mobile',
       use: { ...devices['Pixel 7'] },
       dependencies: ['setup'],
-      testMatch: /0[13]-.*\.spec\.ts/,
+      testMatch: /01-.*\.spec\.ts/,
     },
   ],
 
@@ -44,7 +47,9 @@ export default defineConfig({
     process.env.E2E_BASE_URL !== undefined
       ? undefined
       : {
-          command: 'npm run dev',
+          // E2E uses a no-watch server (dev:e2e) so a file-watcher restart can't
+          // wipe the in-memory PGlite mid-run; plain `npm run dev` otherwise.
+          command: process.env.E2E_SEED === '1' ? 'npm run dev:e2e' : 'npm run dev',
           url: 'http://localhost:5173',
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

@@ -108,6 +108,15 @@ export async function buildApp(): Promise<FastifyInstance> {
 
 async function main(): Promise<void> {
   const app = await buildApp()
+  // E2E convenience: seed this (in-memory) PGlite on boot, so the Playwright
+  // stack needs no separate migrate/seed step or shared data dir -- everything
+  // lives in the one server process. Never runs in production (env-gated).
+  if (process.env.E2E_SEED === '1') {
+    const { migrations } = await import('./infra/migrate.js')
+    const { seed } = await import('./infra/seed.js')
+    await migrations.up()
+    await seed.run()
+  }
   await app.listen({ port: configs.port, host: '0.0.0.0' })
 }
 

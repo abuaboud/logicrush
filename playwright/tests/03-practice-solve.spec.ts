@@ -9,7 +9,7 @@ test.describe('Journey 3 — solve a practice problem', () => {
     await page.getByLabel('اسم المستخدم').fill('demo')
     await page.getByLabel('كلمة المرور').fill('password123')
     await page.getByRole('button', { name: 'دخول' }).click()
-    await expect(page.getByRole('link', { name: 'demo' })).toBeVisible()
+    await expect(page.getByRole('navigation').getByRole('link', { name: 'demo' })).toBeVisible()
   })
 
   test('wrong answer then correct answer are judged', async ({ page }) => {
