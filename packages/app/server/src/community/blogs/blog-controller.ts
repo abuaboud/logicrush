@@ -21,7 +21,7 @@ export const communityController: FastifyPluginAsyncZod = async (app) => {
   app.get('/blogs', ListBlogs, async (request) =>
     blogService.listByCategory({ categorySlug: request.query.category, page: request.query.page, pageSize: request.query.pageSize }),
   )
-  app.get('/blogs/:id', ById, async (request) => blogService.get({ id: request.params.id }))
+  app.get('/blogs/:id', PublicById, async (request) => blogService.get({ id: request.params.id }))
   app.post('/blogs', CreateBlog, async (request, reply) => {
     const created = await blogService.create({ ...request.body, viewer: requireUser(request) })
     return reply.status(201).send(created)
@@ -58,6 +58,9 @@ const PUBLIC = { security: 'public' } as const
 const AUTH = { security: 'authenticated' } as const
 const PublicNoBody = { config: PUBLIC, schema: {} }
 const ById = { config: AUTH, schema: { params: z.object({ id: z.string() }) } }
+// Reading a post is public (the legacy forum is readable logged-out); only the
+// mutations below reuse the AUTH `ById`.
+const PublicById = { config: PUBLIC, schema: { params: z.object({ id: z.string() }) } }
 const ListBlogs = {
   config: PUBLIC,
   schema: { querystring: BlogListQuery },

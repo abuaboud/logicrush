@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { SubmissionFeedResponse } from '@logicrush/shared'
 import { api } from '@/lib/api'
 import { DataTable, Th, Td } from '@/components/ui/table'
+import { Pagination } from '@/components/ui/pagination'
 
 export function SubmissionsRoute() {
   const { page = '1' } = useParams()
@@ -23,6 +24,9 @@ export function SubmissionsRoute() {
           </tr>
         ))}
       </DataTable>
+      {data !== undefined && (
+        <Pagination page={data.page} pageSize={data.pageSize} count={data.items.length} href={(p) => `/submissions/page/${p}`} />
+      )}
     </div>
   )
 }

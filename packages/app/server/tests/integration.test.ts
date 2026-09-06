@@ -125,6 +125,14 @@ describe('votes and contribution points', () => {
     expect(afterFlip).toBe(authorBefore - 1)
   })
 
+  it('serves a blog post to anonymous readers (the legacy forum is public)', async () => {
+    const blogs = await app.inject({ method: 'GET', url: '/api/blogs?category=announcements' })
+    const blogId = blogs.json().items[0].id
+    const res = await app.inject({ method: 'GET', url: `/api/blogs/${blogId}` }) // no cookie
+    expect(res.statusCode).toBe(200)
+    expect(res.json().title).toBeTruthy()
+  })
+
   it('refuses a self-vote', async () => {
     const cookie = await signIn('superjava')
     const blogs = await app.inject({ method: 'GET', url: '/api/blogs?category=announcements' })
