@@ -32,6 +32,9 @@ export const problemService = {
     // visibility-only; approval gates the admin dashboard, not the problemset.
     if (!isStaff(viewer)) q = q.where('visibility', '=', 'public')
     else q = q.where('visibility', '!=', 'deleted')
+    // The problemset is the practice catalogue; problems that belong to a contest
+    // are reached through the contest, not listed here.
+    q = q.where('problem.contest_id', 'is', null)
 
     if (query !== undefined && query.length > 0) {
       q = q.where('title', 'ilike', `%${query}%`)
