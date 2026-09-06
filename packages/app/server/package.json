@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.test.json",
     "db:migrate": "node --env-file-if-exists=../../../.env --import tsx src/infra/migrate.ts",
-    "db:seed": "node --env-file-if-exists=../../../.env --import tsx src/infra/seed.ts"
+    "db:seed": "node --env-file-if-exists=../../../.env --import tsx src/infra/seed.ts",
+    "migrate:legacy": "node --env-file-if-exists=../../../.env --import tsx src/infra/legacy-migrate.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.0",
@@ -24,6 +25,7 @@
     "fastify": "^5.2.0",
     "fastify-type-provider-zod": "^6.1.0",
     "kysely": "^0.28.12",
+    "mysql2": "^3.24.3",
     "nanoid": "^5.0.0",
     "pg": "^8.20.0",
     "sanitize-html": "^2.17.7",
