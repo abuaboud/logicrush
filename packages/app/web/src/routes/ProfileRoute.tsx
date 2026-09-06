@@ -31,6 +31,19 @@ export function ProfileRoute() {
           <CardBody><RatingGraph points={changes} /></CardBody>
         </Card>
       )}
+      {data.badges !== undefined && data.badges.length > 0 && (
+        <Card>
+          <CardHeader>الأوسمة</CardHeader>
+          <CardBody className="flex flex-wrap gap-4">
+            {data.badges.map((b: { title: string; description: string | null; imgUrl: string | null }, i: number) => (
+              <div key={i} className="flex flex-col items-center gap-1 text-center" title={b.description ?? ''}>
+                {b.imgUrl ? <img src={b.imgUrl} alt={b.title} className="h-12 w-12" /> : <div className="bg-gold h-12 w-12 rounded-full" />}
+                <span className="text-xs">{b.title}</span>
+              </div>
+            ))}
+          </CardBody>
+        </Card>
+      )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <ProblemList title="مسائل حُلّت" items={data.solved} />
         <ProblemList title="مسائل من تأليفه" items={data.authored} />

@@ -23,6 +23,7 @@ import { submissionController } from './competition/submissions/submission-contr
 import { contestController } from './competition/contests/contest-controller.js'
 import { contestAdminController } from './competition/admin/contest-admin-controller.js'
 import { communityController } from './community/blogs/blog-controller.js'
+import { seoController } from './infra/seo-controller.js'
 
 const SESSION_COOKIE = 'lr_session'
 
@@ -61,6 +62,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   })
 
   app.get('/api/health', { config: { security: 'public' } }, async () => ({ status: 'ok' as const }))
+  await app.register(seoController)
 
   await app.register(
     async (api) => {

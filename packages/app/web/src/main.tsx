@@ -21,6 +21,8 @@ import { SignInRoute } from './routes/SignInRoute.js'
 import { RegisterRoute } from './routes/RegisterRoute.js'
 import { ProblemsAdminRoute } from './routes/ProblemsAdminRoute.js'
 import { ContestsAdminRoute } from './routes/ContestsAdminRoute.js'
+import { TermsRoute } from './routes/TermsRoute.js'
+import { InfoMessageRoute } from './routes/InfoMessageRoute.js'
 import { NotFoundRoute } from './routes/NotFoundRoute.js'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -49,6 +51,11 @@ const router = createBrowserRouter([
   { path: '/blog/:id', element: w(<BlogRoute />) },
   { path: '/login', element: w(<SignInRoute />) },
   { path: '/register', element: w(<RegisterRoute />) },
+  { path: '/register/:token', element: w(<RegisterRoute />) },
+  { path: '/terms', element: w(<TermsRoute />) },
+  { path: '/validate/:email/:hash/:token', element: w(<InfoMessageRoute />) },
+  { path: '/changepassword/:email/:hash', element: w(<InfoMessageRoute />) },
+  { path: '/:type', element: w(<InfoMessageRoute />) },
   { path: '*', element: w(<NotFoundRoute />) },
 ])
 
