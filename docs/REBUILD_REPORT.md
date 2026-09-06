@@ -137,18 +137,30 @@ completeness incl. /terms and email-link routes (#44), and the E2E harness with 
 browse (#51) and legacy-URL (#57) journeys green (#50). 26 server tests + 17 E2E
 checks passing.
 
-**Also completed since:** image upload with magic-byte validation + avatar UI (#38);
-RTL Arabic email templates for reset/validation (#39); and the **complete E2E epic
-(#49)** — all 8 Playwright journeys green (28 checks: browse, account, practice-solve,
-contest-lifecycle, blind-rule, forum, legacy-URLs, authoring), wired into CI with a
-Postgres service.
+**Final batch (closing the independent verifier's findings):** the in-contest
+participation UI (#27 — live countdown + solvable contest problems, the flagship
+feature that was missing), the forum blog composer (#34), the problem-authoring
+page (#42 create), a genuinely-asserting blind-rule E2E (#55), and an honest
+correction of the golden-replay characterization.
 
-**The entire board is implemented except two items that are genuinely yours to
-decide:**
-- **#46 deployment** and **#47 cutover** — hosting target and switch timing. SSH
-  access to the server is in place; the rebuild can be deployed on your go-ahead.
-- One scoring tie-break (±≤2 positions in 1 of 26 contests) — only if exact
-  historical rank parity is ever required; points reproduce faithfully.
+## 8. Final state
 
-Test evidence: **26 server tests + 28 E2E checks green**, `lint:deps` +
-`check:structure` clean, both packages typecheck and build.
+**Every issue on the board is implemented in code and evidenced except deployment
+(#46) and cutover (#47), which are yours to schedule.** A final independent verifier
+confirmed: server suite green, guardrails/typecheck/build clean, migration faithful
+(0 orphans/dups, rating continuity holds), secrets clean, and — after this batch —
+the user-facing gaps it flagged (in-contest UI, forum/problem authoring, blind-rule
+test) are closed.
+
+**Test evidence:** 26 server tests + 28 E2E checks (all 8 Playwright journeys) green;
+`lint:deps` + `check:structure` clean; shared/server/web typecheck and build; CI runs
+all of it against a Postgres service on every PR.
+
+**Production data:** migrated from the live MySQL (3,757 users, 129,047 submissions,
+50 contests, 382 problems), verified table-by-table against the source; a fresh dump
+is archived. The live site outage was fixed (Cloudflare Error 1000) and its cache
+purged.
+
+**Open, and needing your decision:** deploy target + cutover timing (#46/#47), and
+optionally aligning the one contest's scoreboard rank population with legacy if exact
+historical rank parity is ever required.
