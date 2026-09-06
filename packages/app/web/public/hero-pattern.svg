@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 90" preserveAspectRatio="none" width="1200" height="90">
+  <rect width="1200" height="90" fill="#06458b"/>
+  <g fill="#000" opacity="0.10">
+    <polygon points="0,0 160,0 80,90"/>
+    <polygon points="160,0 340,90 80,90"/>
+    <polygon points="340,0 340,90 520,0"/>
+    <polygon points="520,0 700,90 340,90"/>
+    <polygon points="700,0 700,90 880,0"/>
+    <polygon points="880,0 1060,90 700,90"/>
+    <polygon points="1060,0 1060,90 1200,0"/>
+  </g>
+  <g fill="#fff" opacity="0.05">
+    <polygon points="80,0 260,90 0,90"/>
+    <polygon points="440,0 620,90 260,90"/>
+    <polygon points="800,0 980,90 620,90"/>
+    <polygon points="1140,0 1200,90 980,90"/>
+  </g>
+</svg>
