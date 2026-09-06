@@ -12,14 +12,17 @@ What the 2018 site does, and which parts are *product* (must survive) versus
 
 ## Product — keep exactly
 
-- **Contest scoring**: a problem worth `P`, solved `M` minutes in on try `T`,
-  scores `floor(max(P − M×(P/250) − (T−1)×20, 0.30×P))`. Published to users on
-  the أسس التقييم page.
+- **Contest scoring**: `P div 250` is **integer** division in the Java, so decay
+  is whole points per minute and anything under 250 points never decays.
+  `points = max(P − M×(P div 250) − (T−1)×20, floor(0.30×P))`. Every production
+  point value is a multiple of 250, which hid this for nine years.
 - **Rating**: the Codeforces algorithm verbatim — Elo seeds, `midRank =
   √(rank × seed)`, then two zero-sum passes (all contestants, then top `4√n`).
   Unrated users enter at 1500.
-- **Blind cells**: burn every allowed attempt while a contest is live and you are
-  told nothing until it ends; the cell scores zero.
+- **Blind cells**: burn every allowed attempt **while a contest is live** and you
+  are told nothing until it ends; the cell scores zero. The `&& isActive()` term
+  is load-bearing — after the contest ends cells stop being blind and score
+  normally, so final standings legitimately differ from live ones.
 - **Rating band colours** on usernames everywhere.
 - **URL slugs** (`problem_key`, `contest_key`) — indexed since 2019.
 - RTL Arabic, the gold wordmark, `#06458b` blue, black card headers.
@@ -39,7 +42,26 @@ What the 2018 site does, and which parts are *product* (must survive) versus
 - **The scoreboard refresher**: an in-memory map rebuilt every 5 seconds by a
   `@Scheduled` job issuing a query per contestant per problem.
 
-## Gotcha
+## Gotchas
+
+**`approved` is never enforced.** `AProblemController` writes it and the admin
+dashboard shows it, but no public read path filters on it — `GetPublicProblems`
+filters on `visibility` alone. The dump therefore contains public-but-unapproved
+problems that are live and indexed today. Adding an `approved = true` filter to
+the rebuilt problemset would 404 real pages.
+
+**Timezone is `Asia/Amman` wall clock.** Set as the JVM default in
+`SpringBootWebApplication` and named explicitly in `Submission.getEpochSecond()`.
+Jordan observed DST until October 2022 and has been permanent UTC+3 since, so a
+single fixed offset shifts every pre-2022 summer contest by an hour — which
+shifts elapsed minutes, which shifts every cell score and every rating.
+
+**Passwords are unsalted MD5** (`Utils.MD5`), and the Angular client hashes before
+sending (`RequestLogin.isHashPassword`).
+
+**Contribution points come from votes.** `VoteController` moves the *target
+author's* `contribution_points` by ±1 on a new vote and ±2 on a flip. Nothing else
+writes them.
 
 `Problem` has both an `author_id` and a `writer_id`, and they are routinely
 different people — the profile page lists "authored" and "written" separately.

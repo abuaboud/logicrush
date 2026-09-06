@@ -8,7 +8,11 @@ Status: accepted
 Two pieces of legacy logic are user-visible history that cannot change:
 
 - **Contest scoring** — the decay/penalty/floor formula published to users on the
-  أسس التقييم page.
+  أسس التقييم post. Note that `P / 250` in the legacy Java is **integer** division,
+  so decay is a whole number of points per minute and a problem under 250 points
+  does not decay at all. Every point value in production use is a multiple of 250,
+  which is why this went unnoticed — and why a test pinned only on a 500-point
+  problem cannot detect getting it wrong.
 - **Rating** — the Codeforces rating algorithm, whose outputs are stored in
   `rating_change` and rendered as every user's rating graph.
 

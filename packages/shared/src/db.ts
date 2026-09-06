@@ -27,6 +27,7 @@ export interface Database {
   submission: SubmissionTable
   rating_change: RatingChangeTable
   blog: BlogTable
+  blog_subject: BlogSubjectTable
   blog_category: BlogCategoryTable
   comment: CommentTable
   vote: VoteTable
@@ -147,13 +148,22 @@ export interface RatingChangeTable {
   new_rating: number
 }
 
+// The grouping level above a category — "مدونات عامة" / "مدونات أُخرى" on the forum
+// index. Legacy `blog_subject`; every category hangs off one.
+export interface BlogSubjectTable {
+  id: string
+  legacy_id: number | null
+  title: string
+  order_index: number
+}
+
 export interface BlogCategoryTable {
   id: string
   legacy_id: number | null
   slug: string
   title: string
   description: string | null
-  subject_id: string | null
+  subject_id: string
   order_index: number
 }
 
@@ -188,7 +198,8 @@ export interface CommentTable {
 }
 
 export interface VoteTable {
-  id: Generated<number>
+  id: string
+  legacy_id: number | null
   target: 'blog' | 'comment'
   target_id: string
   user_id: string

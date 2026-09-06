@@ -43,11 +43,15 @@ _Avoid_: a separate "solved" table; mutating a submission after the fact.
 
 **Blind**:
 A cell state on the scoreboard, not a property of a Submission. A contestant is
-**blind** on a problem when they have used every allowed attempt while the
-contest is still running: further attempts are accepted but they are told
+**blind** on a problem when they have used every allowed attempt **while the
+contest is still running**: further attempts are accepted but they are told
 nothing about correctness until the contest ends, and the cell scores zero.
+The clock term is part of the definition — when the contest ends, no cell is
+blind any more, and a blind-but-correct answer scores normally. Final standings
+therefore differ from the standings shown during the contest, by design.
 _Avoid_: reading `submission.blind` as authoritative (the scoreboard recomputes
-it); showing a blind contestant a correct/incorrect result mid-contest.
+it); defining blind from attempt count alone without the active-contest term;
+showing a blind contestant a correct/incorrect result mid-contest.
 
 **Contest**:
 A titled window — `startsAt` plus `lengthMinutes` — holding an ordered set of
@@ -59,15 +63,23 @@ _Avoid_: computing "finished" from a stored flag (it is derived from the clock);
 letting unregistered users onto the scoreboard.
 
 **Scoring**:
-How a Contest cell earns points. A problem worth `P` points, solved `M` minutes
-after the contest start on the contestant's `T`-th try, scores
-`floor(max(P − M × (P / 250) − (T − 1) × 20, 0.30 × P))`. Points decay per
-minute, each wrong try costs a flat 20, and a solved cell never falls below 30%
-of the problem's points. A blind cell scores zero. This formula is published to
-users on the site's أسس التقييم page and must not drift.
-_Avoid_: re-deriving the constants (they are `POINT_DECAY_DIVISOR = 250`,
-`WRONG_ANSWER_PENALTY = 20`, `MIN_POINTS_FRACTION = 0.3` in `@logicrush/shared`);
-rounding differently from `floor`.
+How a Contest cell earns points. `P / 250` is **integer division** — the legacy
+Java divides two ints — so the decay is a whole number of points per minute and a
+problem worth under 250 points never decays at all:
+
+```
+decayPerMinute = P div 250                 (integer; 100 div 250 == 0)
+points         = max(P − M × decayPerMinute − (T − 1) × 20, floor(0.30 × P))
+```
+
+Each wrong try costs a flat 20 and a solved cell never falls below 30% of the
+problem's points. A blind cell scores zero **only while the contest is running**.
+This formula is published to users on the أسس التقييم post and must not drift.
+_Avoid_: writing `P / 250` as real division (it rescores every problem whose
+points are not a multiple of 250 — which is why this went unnoticed for nine
+years); re-deriving the constants (`POINT_DECAY_DIVISOR`, `WRONG_ANSWER_PENALTY`,
+`MIN_POINTS_FRACTION` in `@logicrush/shared`); applying `floor` to the whole
+expression rather than to the `0.30 × P` term alone.
 
 **Rating**:
 A contestant's skill number, moved only by rated Contests. The algorithm is
