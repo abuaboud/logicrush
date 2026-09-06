@@ -192,6 +192,16 @@ function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
 }
 
+// Legacy birthdays include zero-dates (0000-00-00) and other junk that the strict
+// ISO-date schema rejects; treat anything that is not a real calendar date as null.
+function validBirthday(v: string | Date | null): string | null {
+  if (v === null || v === undefined) return null
+  // A Postgres `date` comes back as a Date object; format it, don't String() it.
+  const s = v instanceof Date ? (Number.isNaN(v.getTime()) ? '' : v.toISOString().slice(0, 10)) : String(v).slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s) || s.startsWith('0000')) return null
+  return s
+}
+
 export function formatUser(row: {
   id: string
   username: string
@@ -218,7 +228,7 @@ export function formatUser(row: {
     contributionPoints: row.contribution_points,
     countryCode: row.country_code,
     gender: row.gender as User['gender'],
-    birthday: row.birthday === null ? null : String(row.birthday).slice(0, 10),
+    birthday: validBirthday(row.birthday),
     imgUrl: row.img_url,
     emailValidated: row.email_validated,
     registeredAt: row.registered_at.toISOString(),

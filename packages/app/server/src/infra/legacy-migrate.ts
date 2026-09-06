@@ -100,6 +100,12 @@ async function rows(src: mysql.Connection, sql: string): Promise<Record<string, 
   return r as Record<string, any>[]
 }
 function ts(v: any): Date { return v instanceof Date ? v : new Date(v) }
+function validMigratedBirthday(v: any): string | null {
+  if (!v) return null
+  const d = v instanceof Date ? v : new Date(v)
+  if (Number.isNaN(d.getTime()) || d.getUTCFullYear() < 1900) return null
+  return d.toISOString().slice(0, 10)
+}
 
 async function upsert(table: string, legacyId: number | null, values: Record<string, unknown>): Promise<void> {
   stats[table] = (stats[table] ?? 0) + 1
@@ -156,7 +162,7 @@ async function migrateUsers(src: mysql.Connection) {
       id: mapId('user', u.id), legacy_id: u.id, username, full_name: u.full_name ?? '',
       email, password_hash: u.password ? password.fromLegacyMd5(u.password) : null,
       role: role(u.privilege), rating: u.rating ?? 0, contribution_points: u.contribution_points ?? 0,
-      country_code: cc, gender: gender(u.gender), birthday: u.birthday ? ts(u.birthday).toISOString().slice(0, 10) : null,
+      country_code: cc, gender: gender(u.gender), birthday: validMigratedBirthday(u.birthday),
       img_url: rewriteAsset(u.img_url), email_validated: !!u.validated_email,
       registered_at: ts(u.registration_timestamp), last_online_at: u.last_online_timestamp ? ts(u.last_online_timestamp) : null,
     })
