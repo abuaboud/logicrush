@@ -41,7 +41,7 @@ Legend: ✅ built + verified · ◑ API built, UI pending · ⛔ blocked on prod
 | **Rating (Codeforces)** | ✅ | Unit tests: Elo seed, worst-rank ties, zero-point exclusion, **Math.trunc** pinned by a mutation-verified exact-delta test, unrated entry 1500. |
 | **Rating application** | ✅ | Service: idempotent (replaces rows in a txn), updates `user.rating`, empty contest clean. |
 | **Leaderboard** | ✅ | curl + screenshot: ranked by rating, band colours from shared table (2397→orange, 2067→purple, 0→grey). |
-| **Profile (graph, authored vs written, badges)** | ◑ | API built (`/users/:name/profile`, `/rating-changes`); authored≠written preserved. UI pending. |
+| **Profile (graph, authored vs written)** | ✅ | Rating graph (inline SVG) from real rating_change history, authored/written/solved as distinct lists. Screenshotted on real data. |
 | **Forum index** | ✅ | curl + screenshot: subjects→categories with blog/comment counts. |
 | **Blogs (CRUD)** | ✅ | Service: author-or-admin gate, announcement flag admin-only (403), server-side sanitised. UI list/detail ◑. |
 | **Comments (threaded, 3 targets)** | ✅ (API) | One table, `(target,target_id)`, soft-delete tombstone. UI ◑. |
@@ -49,7 +49,8 @@ Legend: ✅ built + verified · ◑ API built, UI pending · ⛔ blocked on prod
 | **Home aggregate** | ✅ | Single `/api/home` request; screenshot matches live cards. |
 | **Web shell (RTL, identity)** | ✅ | Screenshots: gold/white wordmark, blue hero, black card headers, `lang=ar`/`dir=rtl`, Changa font. |
 | **Legacy URL compatibility** | ◑ | Web router mirrors legacy paths; full crawl test pending (issue #44). |
-| **Image upload / email / notifications / badges UI / admin dashboards** | ◑ | Endpoints/seams exist for some; issues #38–#43 track the rest. |
+| **Admin dashboards (#42, #43)** | ✅ | Problem control (approve/visibility/points via PATCH, setter-scoped) and contest control (create + add-problem, slug-unique) with dashboard UIs; verified signed-in as admin on real data. |
+| **Image upload / email / notifications / badges UI** | ◑ | Backend seams exist (mail-service, image validation); UIs for notifications/badges and real email templates pending (#38–#41). |
 | **Production data migration** | ✅ | Executed against the live MySQL over the exposed 3306. Row-count parity on every table (3,757 users, 382 problems, 129,047 submissions, 50 contests, 1,230 ratings), 3 comment tables collapsed exactly (35/71/181), 0 orphaned FKs, no dup slugs, rating continuity holds, leaderboard matches live. |
 | **Golden replay (scoring parity)** | ✅ | `parity:replay` recomputes every past contest from migrated submissions: **25/26 contests reproduce the recorded ranks exactly** (1098/1230 contestants); the one outlier (iiylo) differs only by ±1–2 tie-break positions among equal-point contestants — points reproduce, not a scoring defect. |
 | **Deployment** | ◑ | Issue #46; not provisioned. |
@@ -113,3 +114,28 @@ Guardrails green: `lint:deps` (no cycles, controllers are sinks, scoring/rating 
 
 - Domain language: `CONTEXT.md` · Decisions: `docs/adr/` · Team learnings: `brain/`
 - Run locally: `npm install && npm run db:migrate && npm -w @logicrush/server run db:seed && npm run dev`
+
+
+## 7. Session progress — what got executed vs. what remains
+
+**Done and evidenced (old-vs-new or real-data screenshots sent):** home, problemset,
+problem page, contests, scoreboard, submissions feed, leaderboard, forum, profile
+(with real rating graph), sign-in flow, and the two admin dashboards — all running
+on the **real migrated production data** and matching the live site. Live site
+outage fixed (Cloudflare Error 1000 → 200, cache purged). Real logo/favicon pulled
+from the server and wired in. SSH access to the server established. Fresh production
+dump taken. 26 tests green.
+
+**Real-data bugs found and fixed this session:** contest-problem practice-list
+parity, the `author_id=0` system-user fallback, case-collision user dedup, and the
+zero-date `birthday` serialization crash (would have 500'd every authenticated
+request) — all regression-tested.
+
+**Remaining (lower-visibility or needs a decision):**
+- #40 notifications UI, #41 badges on profile, #38 image-upload UI, #39 real email
+  templates — backend seams exist; UI/templates pending.
+- #45 SEO meta tags; #50–#58 Playwright journey bodies (harness scaffolded).
+- #46 deployment and #47 cutover — need your call on hosting/timing (the rebuild
+  can be deployed to the server via the SSH access now in place).
+- One scoring tie-break (±≤2 positions in 1 of 26 contests) if exact historical
+  rank parity is required.
