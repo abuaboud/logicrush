@@ -25,3 +25,25 @@ What works instead:
 `ssh -o BatchMode=yes root@HOST 'whoami'` should return `root` with no prompt. If it
 still asks for a password, the key line didn't land — re-check `authorized_keys` for
 truncation.
+
+## Update: the Hetzner console keyboard bridge inverts case (and drops modifiers)
+
+On the LogicRush Hetzner console, the browser→noVNC keyboard bridge (driven via
+automation) had two quirks worth knowing:
+- **Case is inverted.** Typing `whoami` produced `WHOAMI` (command not found);
+  typing `WHOAMI` produced `whoami` → ran. So drive lowercase commands by sending
+  them in UPPERCASE.
+- **Modifiers are dropped.** Ctrl+C types a literal `C` (no SIGINT); Shift is not
+  transmitted, so shifted symbols collapse to their unshifted key (`&`→`7`,
+  `+`→`=`, `_`→`-`, `>`→`.`, `"`→`'`). That makes `_ > < | " $ & ( ) : * + ?` and
+  real uppercase effectively untypeable — you can only produce lowercase letters,
+  digits, and unshifted punctuation (`- . / , ; ' [ ] =` space backtick).
+- To exit a stuck `>` heredoc/quote continuation without Ctrl+C, type a matching
+  quote and Enter.
+
+Consequence: anything needing those symbols (an SSH key with `+/=`, a shell
+redirect, an env-var name with `_`) cannot be typed through this console. When a
+DB port is already exposed, dumping directly over it from your own machine beats
+fighting the console. Reading a credentials file to do so may be blocked by the
+agent's own secret-file classifier — that is a per-action approval for the human
+to grant, not something to work around.
