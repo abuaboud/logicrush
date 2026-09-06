@@ -73,10 +73,14 @@ export const problemService = {
 
   async getBySlugOrThrow({ slug, viewer }: { slug: string; viewer?: Principal }): Promise<PublicProblem> {
     const row = await databaseService.db().selectFrom('problem').selectAll().where('slug', '=', slug).executeTakeFirst()
-    if (row === undefined || (row.visibility === 'deleted' && !isStaff(viewer))) {
+    if (row === undefined || (row.visibility !== 'public' && !isStaff(viewer))) {
       throw new AppError({ code: ErrorCode.ENTITY_NOT_FOUND, params: { entity: 'problem', slug } })
     }
-    if (row.visibility !== 'public' && !isStaff(viewer)) {
+    // A problem that belongs to a contest is reached only through the contest
+    // dashboard (behind the start-time and registration gate), never through the
+    // public practice detail endpoint -- otherwise an active contest's problems
+    // are readable by guessing the slug.
+    if (row.contest_id !== null && !isStaff(viewer)) {
       throw new AppError({ code: ErrorCode.ENTITY_NOT_FOUND, params: { entity: 'problem', slug } })
     }
 

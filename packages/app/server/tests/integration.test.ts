@@ -43,6 +43,13 @@ describe('problemset', () => {
   })
 })
 
+describe('contest problems are gated', () => {
+  it('does not serve a contest problem through the public practice detail endpoint', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/problems/meshka-1-even-numbers' })
+    expect(res.statusCode).toBe(404)
+  })
+})
+
 describe('submission judging', () => {
   it('judges case/space-insensitively and counts a solve once', async () => {
     const cookie = await signIn('demo')
