@@ -11,7 +11,8 @@
     "typecheck": "tsc -p tsconfig.test.json",
     "db:migrate": "node --env-file-if-exists=../../../.env --import tsx src/infra/migrate.ts",
     "db:seed": "node --env-file-if-exists=../../../.env --import tsx src/infra/seed.ts",
-    "migrate:legacy": "node --env-file-if-exists=../../../.env --import tsx src/infra/legacy-migrate.ts"
+    "migrate:legacy": "node --env-file-if-exists=../../../.env --import tsx src/infra/legacy-migrate.ts",
+    "parity:replay": "npm run build && node scripts/golden-replay.mjs"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.0",

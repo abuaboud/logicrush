@@ -32,9 +32,10 @@ export const problemService = {
     // visibility-only; approval gates the admin dashboard, not the problemset.
     if (!isStaff(viewer)) q = q.where('visibility', '=', 'public')
     else q = q.where('visibility', '!=', 'deleted')
-    // The problemset is the practice catalogue; problems that belong to a contest
-    // are reached through the contest, not listed here.
-    q = q.where('problem.contest_id', 'is', null)
+    // Legacy's practice list is visibility-only (GetPublicProblems filters on
+    // visibility alone): a problem used in a past contest still appears here.
+    // The active-contest leak is prevented on the detail endpoint, not by hiding
+    // the problem from every list forever.
 
     if (query !== undefined && query.length > 0) {
       q = q.where('title', 'ilike', `%${query}%`)
@@ -76,12 +77,37 @@ export const problemService = {
     if (row === undefined || (row.visibility !== 'public' && !isStaff(viewer))) {
       throw new AppError({ code: ErrorCode.ENTITY_NOT_FOUND, params: { entity: 'problem', slug } })
     }
-    // A problem that belongs to a contest is reached only through the contest
-    // dashboard (behind the start-time and registration gate), never through the
-    // public practice detail endpoint -- otherwise an active contest's problems
-    // are readable by guessing the slug.
+    // Legacy serves a contest's problem statement through the normal read; the
+    // one thing we add is that while its contest is CURRENTLY running, only staff
+    // and registered contestants may read it (so it can't be scraped mid-contest
+    // by guessing the slug). Past and contest-less problems read normally.
     if (row.contest_id !== null && !isStaff(viewer)) {
-      throw new AppError({ code: ErrorCode.ENTITY_NOT_FOUND, params: { entity: 'problem', slug } })
+      const contest = await databaseService
+        .db()
+        .selectFrom('contest')
+        .select(['starts_at', 'length_minutes'])
+        .where('id', '=', row.contest_id)
+        .executeTakeFirst()
+      if (contest !== undefined) {
+        const start = contest.starts_at.getTime()
+        const end = start + contest.length_minutes * 60_000
+        const now = clock.now().getTime()
+        const active = now >= start && now <= end
+        if (active) {
+          const registered =
+            viewer !== undefined &&
+            (await databaseService
+              .db()
+              .selectFrom('contest_register')
+              .select('user_id')
+              .where('contest_id', '=', row.contest_id)
+              .where('user_id', '=', viewer.userId)
+              .executeTakeFirst()) !== undefined
+          if (!registered) {
+            throw new AppError({ code: ErrorCode.ENTITY_NOT_FOUND, params: { entity: 'problem', slug } })
+          }
+        }
+      }
     }
 
     const options =

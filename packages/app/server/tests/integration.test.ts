@@ -32,10 +32,10 @@ async function signIn(username: string, password = 'password123'): Promise<strin
 }
 
 describe('problemset', () => {
-  it('lists practice problems without leaking answers and without contest copies', async () => {
+  it('lists all public problems (incl. past-contest) without leaking answers', async () => {
     const res = await app.inject({ method: 'GET', url: '/api/problems?page=1' })
     const body = res.json()
-    expect(body.total).toBe(8)
+    expect(body.total).toBe(11) // 8 practice + 3 past-contest copies (legacy lists both)
     for (const p of body.items) {
       expect(p).not.toHaveProperty('solution')
       expect(p).not.toHaveProperty('correctOption')
@@ -43,10 +43,11 @@ describe('problemset', () => {
   })
 })
 
-describe('contest problems are gated', () => {
-  it('does not serve a contest problem through the public practice detail endpoint', async () => {
+describe('contest problems are gated only while the contest is active', () => {
+  it('serves a PAST contest problem through the practice detail endpoint (legacy parity)', async () => {
+    // meshka-1 is a 2020 contest, long finished -> its problems are practice.
     const res = await app.inject({ method: 'GET', url: '/api/problems/meshka-1-even-numbers' })
-    expect(res.statusCode).toBe(404)
+    expect(res.statusCode).toBe(200)
   })
 })
 
