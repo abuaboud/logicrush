@@ -16,6 +16,8 @@ type Timestamp = ColumnType<Date, Date | string, Date | string>
 
 export interface Database {
   user: UserTable
+  session: SessionTable
+  auth_token: AuthTokenTable
   country: CountryTable
   problem: ProblemTable
   problem_option: ProblemOptionTable
@@ -53,6 +55,24 @@ export interface UserTable {
   email_validated: boolean
   registered_at: Timestamp
   last_online_at: Timestamp | null
+}
+
+export interface SessionTable {
+  id: string
+  user_id: string
+  expires_at: Timestamp
+  created_at: Timestamp
+}
+
+// Email-validation and password-reset tokens. Stored hashed and single-use --
+// `used_at` is what makes a reset link unusable a second time.
+export interface AuthTokenTable {
+  id: string
+  user_id: string
+  kind: 'email_validation' | 'password_reset'
+  token_hash: string
+  expires_at: Timestamp
+  used_at: Timestamp | null
 }
 
 export interface CountryTable {
@@ -117,6 +137,7 @@ export interface ContestTable {
   author_id: string
   starts_at: Timestamp
   length_minutes: number
+  allowed_attempts: number
   visibility: 'public' | 'unlisted' | 'deleted'
   created_at: Timestamp
   updated_at: Timestamp
@@ -226,6 +247,7 @@ export interface NotificationTable {
   legacy_id: number | null
   user_id: string
   content: string
+  link: string | null
   read: boolean
   created_at: Timestamp
 }

@@ -13,21 +13,7 @@ export const ContestSchema = z.object({
   updatedAt: z.iso.datetime(),
 })
 
-export const ScoreboardCellSchema = z.object({
-  tries: z.number().int(),
-  blind: z.boolean(),
-  points: z.number().int(),
-  solvedAtMinute: z.number().int().nullable(),
-})
 
-export const ScoreboardRowSchema = z.object({
-  username: z.string(),
-  rating: z.number().int(),
-  countryCode: z.string().length(2).nullable(),
-  rank: z.number().int(),
-  totalPoints: z.number().int(),
-  cells: z.array(ScoreboardCellSchema),
-})
 
 // Contest scoring, ported verbatim from the legacy ScoreboardService.
 //
@@ -77,4 +63,3 @@ export function contestCellPoints({
 }
 
 export type Contest = z.infer<typeof ContestSchema>
-export type ScoreboardRow = z.infer<typeof ScoreboardRowSchema>

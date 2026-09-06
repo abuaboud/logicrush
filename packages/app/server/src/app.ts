@@ -7,9 +7,22 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
+import { z } from 'zod'
 import { AppError, ErrorCode } from '@logicrush/shared'
 import { configs } from './configs.js'
 import { databaseService } from './infra/database.js'
+import { clock } from './infra/clock.js'
+import { authService } from './identity/auth/auth-service.js'
+import { security } from './identity/auth/security.js'
+import { authController } from './identity/auth/auth-controller.js'
+import { userController } from './identity/users/user-controller.js'
+import { problemController } from './catalog/problems/problem-controller.js'
+import { tagController } from './catalog/tags/tag-controller.js'
+import { submissionController } from './competition/submissions/submission-controller.js'
+import { contestController } from './competition/contests/contest-controller.js'
+import { communityController } from './community/blogs/blog-controller.js'
+
+const SESSION_COOKIE = 'lr_session'
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({ logger: { level: configs.logLevel } }).withTypeProvider<ZodTypeProvider>()
@@ -19,11 +32,19 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await app.register(cors, { origin: configs.frontendUrl, credentials: true })
   await app.register(cookie, { secret: configs.authSecret })
-  await app.register(rateLimit, { max: 300, timeWindow: '1 minute' })
+  await app.register(rateLimit, { max: 600, timeWindow: '1 minute' })
 
-  // One place turns a thrown value into a response. AppError carries its own
-  // status; Fastify's own 4xx (schema validation) passes through; anything else
-  // is a bug and is logged, never echoed to the client.
+  // Resolve the principal from the session cookie on every request, then enforce
+  // the route's declared access. Two hooks, one place -- handlers never re-derive
+  // identity or assert a role inline.
+  app.addHook('onRequest', async (request) => {
+    const sessionId = request.cookies[SESSION_COOKIE]
+    if (sessionId !== undefined) {
+      request.principal = await authService.resolve({ sessionId })
+    }
+  })
+  app.addHook('preHandler', security.authorize)
+
   app.setErrorHandler((error: unknown, _request, reply) => {
     if (error instanceof AppError) {
       return reply.status(error.status).send({ code: error.code, params: error.params })
@@ -37,11 +58,34 @@ export async function buildApp(): Promise<FastifyInstance> {
     return reply.status(500).send({ code: 'INTERNAL' })
   })
 
-  app.get('/api/health', async () => ({ status: 'ok' as const }))
+  app.get('/api/health', { config: { security: 'public' } }, async () => ({ status: 'ok' as const }))
 
-  // Feature controllers register here as they land. Each is a
-  // FastifyPluginAsyncZod living in its module folder under identity/,
-  // catalog/, competition/ or community/.
+  await app.register(
+    async (api) => {
+      await api.register(authController)
+      await api.register(userController)
+      await api.register(problemController)
+      await api.register(tagController)
+      await api.register(submissionController)
+      await api.register(contestController)
+      await api.register(communityController)
+
+      // Test-only clock control for the E2E suite. Mounted ONLY when
+      // NODE_ENV=test, so contest time cannot be rewritten in production.
+      if (clock.isTestMode()) {
+        api.post(
+          '/test/clock',
+          { config: { security: 'public' }, schema: { body: z.object({ now: z.iso.datetime() }) } },
+          async (request) => {
+            const body = request.body as { now: string }
+            clock.pin(new Date(body.now))
+            return { now: clock.now().toISOString() }
+          },
+        )
+      }
+    },
+    { prefix: '/api' },
+  )
 
   return app
 }
