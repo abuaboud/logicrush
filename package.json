@@ -1,0 +1,24 @@
+{
+  "name": "logicrush",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm -w @logicrush/shared run build && concurrently -k -n shared,server,web -c gray,cyan,magenta \"npm -w @logicrush/shared run dev\" \"npm -w @logicrush/server run dev\" \"npm -w @logicrush/web run dev\"",
+    "build": "npm -w @logicrush/shared run build && npm -w @logicrush/server run build && npm -w @logicrush/web run build",
+    "start": "npm -w @logicrush/server run start",
+    "lint:deps": "depcruise packages/app/server/src --config .dependency-cruiser.cjs",
+    "check:structure": "node scripts/check-structure.mjs",
+    "typecheck": "npm -w @logicrush/shared run build && npm -w @logicrush/server run typecheck && npm -w @logicrush/web run typecheck",
+    "test": "npm run lint:deps && npm run check:structure && npm -w @logicrush/shared run build && npm -w @logicrush/server test && npm -w @logicrush/web test",
+    "db:migrate": "npm -w @logicrush/server run db:migrate"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/app/*"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "dependency-cruiser": "^18.1.0",
+    "typescript": "^5.4.0"
+  }
+}

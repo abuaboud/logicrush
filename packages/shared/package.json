@@ -1,0 +1,19 @@
+{
+  "name": "@logicrush/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
+    "./db": { "import": "./dist/db.js", "types": "./dist/db.d.ts" }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput"
+  },
+  "dependencies": { "zod": "^4.0.0" },
+  "devDependencies": { "kysely": "^0.28.12", "typescript": "^5.4.0" }
+}

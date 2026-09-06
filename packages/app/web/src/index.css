@@ -1,0 +1,96 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/changa';
+
+/* LogicRush's palette, lifted from the legacy Angular stylesheet so the rebuilt
+   UI is the same design rendered by shadcn primitives, not a new look:
+     #06458b  brand blue      hero banner, tag chips, primary buttons
+     #085bb9  brand blue light links, hover states
+     #f0a500  gold            the wordmark's "Logic" and the logo mark
+     #111111  ink             navbar and card headers (legacy used flat black)
+     #f1f1f1  page ground
+   Rating band colours are NOT here: they live in @logicrush/shared next to the
+   band table, because the server sends them on scoreboard and profile payloads. */
+
+@theme {
+  --font-sans: 'Changa Variable', 'Changa', system-ui, sans-serif;
+
+  --color-brand: #06458b;
+  --color-brand-light: #085bb9;
+  --color-gold: #f0a500;
+  --color-ink: #111111;
+}
+
+:root {
+  --background: #f1f1f1;
+  --foreground: #333333;
+
+  --card: #ffffff;
+  --card-foreground: #333333;
+
+  --popover: #ffffff;
+  --popover-foreground: #333333;
+
+  /* Primary is the brand blue: legacy primary buttons, active tabs and tag
+     chips were all #06458b on white. */
+  --primary: #06458b;
+  --primary-foreground: #ffffff;
+
+  --secondary: #e7eeef;
+  --secondary-foreground: #333333;
+
+  --muted: #f9f9f9;
+  --muted-foreground: #676a6c;
+
+  --accent: #eff7ff;
+  --accent-foreground: #06458b;
+
+  --destructive: #dd4b39;
+  --destructive-foreground: #ffffff;
+
+  --border: #e7eaec;
+  --input: #e7eaec;
+  --ring: #085bb9;
+
+  /* Legacy card headers were flat black bars with white text. shadcn has no
+     token for that, so it is its own pair rather than an override of --card. */
+  --header: #111111;
+  --header-foreground: #ffffff;
+
+  --radius: 0.25rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
