@@ -8,18 +8,7 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: logicrush
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     env:
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/logicrush
       AUTH_SECRET: ci-secret
     steps:
       - uses: actions/checkout@v4
@@ -34,11 +23,14 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
+      # E2E: seed and the dev server run from different cwds, so the PGlite data
+      # dir must be an absolute path they both open (sequentially -- PGlite is
+      # single-connection).
       - run: npm run test:e2e:seed
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/logicrush
+          PGLITE_DATA_DIR: /tmp/lr-e2e-pgdata
       - run: npm run test:e2e
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/logicrush
+          PGLITE_DATA_DIR: /tmp/lr-e2e-pgdata
           AUTH_SECRET: ci-secret
           NODE_ENV: test

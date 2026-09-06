@@ -33,6 +33,7 @@ import { seoController } from './infra/seo-controller.js'
 const SESSION_COOKIE = 'lr_session'
 
 export async function buildApp(): Promise<FastifyInstance> {
+  await databaseService.connect()
   const app = Fastify({ logger: { level: configs.logLevel } }).withTypeProvider<ZodTypeProvider>()
 
   app.setValidatorCompiler(validatorCompiler)

@@ -1,6 +1,7 @@
 # MEMORY
 
 - **2026-09-06** — Rebuild feature-complete + real prod data migrated + verified; a final independent verifier caught that "API built" != "feature usable" (the in-contest UI was missing though its API was done) — always verify against the live product, not the endpoint list. Deploying to beta.logicrush.com on the same server next.
+- **2026-09-06** — beta.logicrush.com is live on the legacy box: rebuild in a node:22 container on PGlite (real prod data migrated — 3.7k users, 50 contests, 382 problems, 129k submissions), nginx vhost proxying to it, legacy site untouched. Switched the DB from Postgres to PGlite (`brain/decisions/use-pglite-for-the-beta-database.md`); deploy shape + nginx vhost gotcha in `brain/engineering/beta-deploy-on-the-legacy-server.md`. Also fixed a site-wide layout shift: routes rendered a one-line loading text that collapsed `<main>` and made the footer jump — anchored it with a flex-column layout + `keepPreviousData`.
 
 Dated one-off notes that have not earned their own page.
 

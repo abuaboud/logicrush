@@ -1,6 +1,6 @@
 import { StrictMode, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, keepPreviousData } from '@tanstack/react-query'
 import { RouterProvider, createBrowserRouter, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import './index.css'
@@ -29,7 +29,11 @@ import { InfoMessageRoute } from './routes/InfoMessageRoute.js'
 import { NotificationsRoute } from './routes/NotificationsRoute.js'
 import { NotFoundRoute } from './routes/NotFoundRoute.js'
 
-const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+// keepPreviousData: paginating a list keeps the current rows on screen while the
+// next page loads, instead of collapsing to a loading line (which shifts layout).
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false, placeholderData: keepPreviousData } },
+})
 const w = (el: ReactNode) => <Layout>{el}</Layout>
 
 // Paths mirror the legacy Angular router so existing links keep resolving.
