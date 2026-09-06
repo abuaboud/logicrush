@@ -18,6 +18,8 @@ import { ProfileRoute } from './routes/ProfileRoute.js'
 import { ForumRoute } from './routes/ForumRoute.js'
 import { CategoryRoute } from './routes/CategoryRoute.js'
 import { BlogRoute } from './routes/BlogRoute.js'
+import { CreateBlogRoute } from './routes/CreateBlogRoute.js'
+import { CreateProblemRoute } from './routes/CreateProblemRoute.js'
 import { SignInRoute } from './routes/SignInRoute.js'
 import { RegisterRoute } from './routes/RegisterRoute.js'
 import { ProblemsAdminRoute } from './routes/ProblemsAdminRoute.js'
@@ -36,6 +38,7 @@ const router = createBrowserRouter([
   { path: '/problemset', element: <Navigate to="/problemset/page/1" replace /> },
   { path: '/problemset/page/:page', element: w(<ProblemsetRoute />) },
   { path: '/problemset/tag/:tag/page/:page', element: w(<ProblemsetRoute />) },
+  { path: '/problem/new', element: w(<CreateProblemRoute />) },
   { path: '/problem/:slug', element: w(<ProblemRoute />) },
   { path: '/contests', element: w(<ContestsRoute />) },
   { path: '/contest/:slug/dashboard', element: w(<ContestDashboardRoute />) },
@@ -52,6 +55,7 @@ const router = createBrowserRouter([
   { path: '/contests/dashboard', element: w(<ContestsAdminRoute />) },
   { path: '/forum/:category/page/:page', element: w(<CategoryRoute />) },
   { path: '/blog/:id', element: w(<BlogRoute />) },
+  { path: '/forum/:category/create/blog', element: w(<CreateBlogRoute />) },
   { path: '/login', element: w(<SignInRoute />) },
   { path: '/register', element: w(<RegisterRoute />) },
   { path: '/register/:token', element: w(<RegisterRoute />) },

@@ -16,7 +16,12 @@ export function CategoryRoute() {
   })
   return (
     <Card>
-      <CardHeader>{category}</CardHeader>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <span>{category}</span>
+          <Link to={`/forum/${category}/create/blog`} className="text-xs font-normal underline">مدونة جديدة</Link>
+        </div>
+      </CardHeader>
       <CardBody className="p-0">
         {(data?.items ?? []).map((b) => (
           <div key={b.id} className="flex items-center justify-between border-b border-border px-4 py-3 last:border-0">
