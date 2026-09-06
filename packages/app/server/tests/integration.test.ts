@@ -62,11 +62,11 @@ describe('submission judging', () => {
     const wrong = await app.inject({ method: 'POST', url: '/api/problems/vegetable-shop/submissions', headers, payload: { answer: 'ب' } })
     expect(wrong.json().correct).toBe(false)
 
-    const right = await app.inject({ method: 'POST', url: '/api/problems/vegetable-shop/submissions', headers, payload: { answer: '  أ  ' } })
+    const right = await app.inject({ method: 'POST', url: '/api/problems/vegetable-shop/submissions', headers, payload: { answer: '  الخيار أ  ' } })
     expect(right.json().correct).toBe(true)
 
     // A repeat correct answer is refused and must not double-count.
-    const repeat = await app.inject({ method: 'POST', url: '/api/problems/vegetable-shop/submissions', headers, payload: { answer: 'أ' } })
+    const repeat = await app.inject({ method: 'POST', url: '/api/problems/vegetable-shop/submissions', headers, payload: { answer: 'الخيار أ' } })
     expect(repeat.statusCode).toBe(409)
 
     const after = await app.inject({ method: 'GET', url: '/api/problems/vegetable-shop' })

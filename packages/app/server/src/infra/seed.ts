@@ -61,7 +61,7 @@ export const seed = {
         await db.insertInto('problem').values({
           id, legacy_id: null, slug: p.slug, title: p.title, type: 'choice', author_id: author, writer_id: writer,
           description: `<p>هذا سؤال منطقي تجريبي: ${p.title}. اختر الإجابة الصحيحة من الخيارات التالية.</p>`,
-          solution: `<p>الحل: الإجابة الصحيحة هي «${p.correct}».</p>`, correct_option: p.correct,
+          solution: `<p>الحل: الإجابة الصحيحة هي «${p.correct}».</p>`, correct_option: `الخيار ${p.correct}`,
           visibility: 'public', approved: true, points: p.points, solved_count: p.solved, number_of_attempts: 4,
           contest_id: null, order_index: 0, created_at: new Date('2019-06-01T10:00:00Z'), updated_at: new Date(),
         }).execute()
