@@ -19,6 +19,8 @@ import { CategoryRoute } from './routes/CategoryRoute.js'
 import { BlogRoute } from './routes/BlogRoute.js'
 import { SignInRoute } from './routes/SignInRoute.js'
 import { RegisterRoute } from './routes/RegisterRoute.js'
+import { ProblemsAdminRoute } from './routes/ProblemsAdminRoute.js'
+import { ContestsAdminRoute } from './routes/ContestsAdminRoute.js'
 import { NotFoundRoute } from './routes/NotFoundRoute.js'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -40,6 +42,9 @@ const router = createBrowserRouter([
   { path: '/submissions/page/:page', element: w(<SubmissionsRoute />) },
   { path: '/profile/:username', element: w(<ProfileRoute />) },
   { path: '/forum', element: w(<ForumRoute />) },
+  { path: '/problems/dashboard', element: <Navigate to="/problems/dashboard/page/1" replace /> },
+  { path: '/problems/dashboard/page/:page', element: w(<ProblemsAdminRoute />) },
+  { path: '/contests/dashboard', element: w(<ContestsAdminRoute />) },
   { path: '/forum/:category/page/:page', element: w(<CategoryRoute />) },
   { path: '/blog/:id', element: w(<BlogRoute />) },
   { path: '/login', element: w(<SignInRoute />) },

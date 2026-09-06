@@ -18,8 +18,10 @@ import { authController } from './identity/auth/auth-controller.js'
 import { userController } from './identity/users/user-controller.js'
 import { problemController } from './catalog/problems/problem-controller.js'
 import { tagController } from './catalog/tags/tag-controller.js'
+import { problemAdminController } from './catalog/admin/problem-admin-controller.js'
 import { submissionController } from './competition/submissions/submission-controller.js'
 import { contestController } from './competition/contests/contest-controller.js'
+import { contestAdminController } from './competition/admin/contest-admin-controller.js'
 import { communityController } from './community/blogs/blog-controller.js'
 
 const SESSION_COOKIE = 'lr_session'
@@ -66,8 +68,10 @@ export async function buildApp(): Promise<FastifyInstance> {
       await api.register(userController)
       await api.register(problemController)
       await api.register(tagController)
+      await api.register(problemAdminController)
       await api.register(submissionController)
       await api.register(contestController)
+      await api.register(contestAdminController)
       await api.register(communityController)
 
       // Test-only clock control for the E2E suite. Mounted ONLY when

@@ -54,3 +54,22 @@ export type ScoreboardRow = z.infer<typeof ScoreboardRowSchema>
 export type SubmissionFeedItem = z.infer<typeof SubmissionFeedItemSchema>
 
 export const ContestListQuery = z.object({ state: z.enum(['active', 'upcoming', 'past']).default('active') })
+
+// --- Admin (contest authoring) ---
+export const CreateContestBody = z.object({
+  slug: z.string().min(1).max(64).regex(/^[A-Za-z0-9_-]+$/),
+  title: z.string().min(1).max(200),
+  startsAt: z.iso.datetime(),
+  lengthMinutes: z.number().int().positive(),
+  allowedAttempts: z.number().int().min(1).default(3),
+})
+export const AdminContestRow = z.object({
+  slug: z.string(),
+  title: z.string(),
+  startsAt: z.iso.datetime(),
+  lengthMinutes: z.number().int(),
+  state: ContestStateSchema,
+  problemCount: z.number().int(),
+})
+export const AdminContestListResponse = z.object({ items: z.array(AdminContestRow) })
+export const AddContestProblemBody = z.object({ problemSlug: z.string() })

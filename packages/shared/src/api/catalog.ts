@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ProblemTypeSchema } from '../catalog/problem.js'
+import { ProblemTypeSchema, VisibilitySchema } from '../catalog/problem.js'
 import { paged } from './pagination.js'
 
 // --- Problems ---
@@ -45,3 +45,33 @@ export const TagListResponse = z.array(TagWithCountSchema)
 export type ProblemListItem = z.infer<typeof ProblemListItemSchema>
 export type PublicProblem = z.infer<typeof PublicProblemSchema>
 export type TagWithCount = z.infer<typeof TagWithCountSchema>
+
+// --- Admin (problem authoring) ---
+export const CreateProblemBody = z.object({
+  title: z.string().min(1).max(200),
+  type: ProblemTypeSchema.default('choice'),
+  description: z.string().default(''),
+  solution: z.string().default(''),
+  correctOption: z.string().default(''),
+  points: z.number().int().min(0).default(500),
+  options: z.array(z.string()).default([]),
+})
+export const UpdateProblemBody = z.object({
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().optional(),
+  solution: z.string().optional(),
+  correctOption: z.string().optional(),
+  points: z.number().int().min(0).optional(),
+  approved: z.boolean().optional(),
+  visibility: VisibilitySchema.optional(),
+})
+export const AdminProblemRow = z.object({
+  slug: z.string(),
+  title: z.string(),
+  approved: z.boolean(),
+  visibility: VisibilitySchema,
+  points: z.number().int(),
+  solvedCount: z.number().int(),
+  authorUsername: z.string(),
+})
+export const AdminProblemListResponse = paged(AdminProblemRow)
