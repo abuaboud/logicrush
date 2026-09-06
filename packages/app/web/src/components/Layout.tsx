@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/lib/auth'
 
 // The site frame: black navbar with the gold/white wordmark, the blue hero strip,
 // the grey page ground, and the footer. RTL throughout -- nav sits right-to-left.
@@ -13,6 +14,7 @@ const NAV = [
 ]
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { user, signOut } = useAuth()
   return (
     <div className="min-h-screen bg-background text-foreground">
       <nav className="bg-ink text-header-foreground">
@@ -26,7 +28,14 @@ export function Layout({ children }: { children: ReactNode }) {
                 {n.label}
               </Link>
             ))}
-            <Link to="/login" className="opacity-90 hover:opacity-100">تسجيل الدخول</Link>
+            {user === null ? (
+              <Link to="/login" className="opacity-90 hover:opacity-100">تسجيل الدخول</Link>
+            ) : (
+              <>
+                <Link to={`/profile/${user.username}`} className="opacity-90 hover:opacity-100">{user.username}</Link>
+                <button onClick={() => void signOut()} className="opacity-90 hover:opacity-100">خروج</button>
+              </>
+            )}
           </div>
         </div>
       </nav>
