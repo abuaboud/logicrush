@@ -40,9 +40,8 @@ export function Layout({ children }: { children: ReactNode }) {
             )}
           </div>
           {/* logo last → renders at the LEFT in RTL */}
-          <Link to="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-            <img src="/logo-mark.svg" alt="" className="h-8 w-8" />
-            <span><span className="text-gold">Logic</span>Rush</span>
+          <Link to="/" aria-label="LogicRush" className="flex items-center">
+            <img src="/logo-yellow.png" alt="LogicRush" className="h-9 w-auto" />
           </Link>
         </div>
       </nav>
@@ -53,10 +52,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <main className="mx-auto max-w-6xl px-6 py-6">{children}</main>
       <footer className="bg-ink text-header-foreground mt-12 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-6 text-sm opacity-80">
-          <span className="flex items-center gap-2 text-lg font-bold">
-            <img src="/logo-mark.svg" alt="" className="h-6 w-6" />
-            <span><span className="text-gold">Logic</span>Rush</span>
-          </span>
+          <img src="/logo-yellow.png" alt="LogicRush" className="h-7 w-auto" />
           <span>موقع تعليميّ لتنمية التفكير الحسابي والمنطقي</span>
         </div>
       </footer>
