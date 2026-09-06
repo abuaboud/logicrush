@@ -1,5 +1,6 @@
 import { databaseService } from '../../infra/database.js'
 import type { Principal } from '../auth/security.js'
+import { sanitize } from '../../community/shared/sanitize.js'
 
 // In-app notifications. FCM/push was dropped with the Android app (ADR 0005);
 // creation stays behind one call site per event type so a web-push transport
@@ -16,7 +17,7 @@ export const notificationService = {
       .offset((page - 1) * pageSize)
       .execute()
     return {
-      items: rows.map((r) => ({ id: r.id, content: r.content, link: r.link, read: r.read, createdAt: r.created_at.toISOString() })),
+      items: rows.map((r) => ({ id: r.id, content: sanitize.html(r.content), link: r.link, read: r.read, createdAt: r.created_at.toISOString() })),
       page,
       pageSize,
     }

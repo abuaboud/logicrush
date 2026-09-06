@@ -30,7 +30,7 @@ export function NotificationsRoute() {
         ) : (
           data?.items.map((n) => (
             <div key={n.id} className={`border-b border-border px-4 py-3 last:border-0 ${n.read ? '' : 'bg-accent'}`}>
-              <div className="text-sm">{n.content}</div>
+              <div className="text-sm" dangerouslySetInnerHTML={{ __html: n.content }} />
               <div className="text-muted-foreground text-xs">{new Date(n.createdAt).toLocaleString('ar')}</div>
             </div>
           ))
