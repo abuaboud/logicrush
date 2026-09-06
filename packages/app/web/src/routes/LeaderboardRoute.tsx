@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { LeaderboardResponse } from '@logicrush/shared'
 import { api } from '@/lib/api'
 import { DataTable, Th, Td } from '@/components/ui/table'
+import { Pagination } from '@/components/ui/pagination'
 import { Username } from '@/components/Username'
 
 export function LeaderboardRoute() {
@@ -23,6 +24,9 @@ export function LeaderboardRoute() {
           </tr>
         ))}
       </DataTable>
+      {data !== undefined && (
+        <Pagination page={data.page} pageSize={data.pageSize} count={data.items.length} total={data.total} href={(p) => `/leaderboard/page/${p}`} />
+      )}
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { ProblemListResponse } from '@logicrush/shared'
 import { api } from '@/lib/api'
 import { DataTable, Th, Td } from '@/components/ui/table'
 import { TagChip } from '@/components/ui/tag-chip'
+import { Pagination } from '@/components/ui/pagination'
 import { Link } from 'react-router-dom'
 
 export function ProblemsetRoute() {
@@ -38,6 +39,15 @@ export function ProblemsetRoute() {
           </tr>
         ))}
       </DataTable>
+      {data !== undefined && (
+        <Pagination
+          page={data.page}
+          pageSize={data.pageSize}
+          count={data.items.length}
+          total={data.total}
+          href={(p) => (tag !== undefined ? `/problemset/tag/${encodeURIComponent(tag)}/page/${p}` : `/problemset/page/${p}`)}
+        />
+      )}
     </div>
   )
 }

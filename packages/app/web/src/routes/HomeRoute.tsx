@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { HomeResponse } from '@logicrush/shared'
 import { api } from '@/lib/api'
 import { Card, CardHeader, CardBody } from '@/components/ui/card'
@@ -30,7 +31,7 @@ export function HomeRoute() {
             ) : (
               data.contests.map((c) => (
                 <div key={c.slug} className="flex justify-between border-b border-border px-4 py-2 text-sm last:border-0">
-                  <span>{c.title}</span>
+                  <Link to={`/contest/${c.slug}/dashboard`} className="text-brand-light hover:underline">{c.title}</Link>
                   <span className="text-muted-foreground">{new Date(c.startsAt).toLocaleDateString('ar')}</span>
                 </div>
               ))
