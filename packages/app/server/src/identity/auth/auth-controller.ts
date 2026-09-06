@@ -13,6 +13,7 @@ import {
 import { requireUser } from './security.js'
 import { authService } from './auth-service.js'
 import { userService } from '../users/user-service.js'
+import { mailService } from './mail-service.js'
 
 const SESSION_COOKIE = 'lr_session'
 
@@ -74,7 +75,12 @@ export const authController: FastifyPluginAsyncZod = async (app) => {
   // account-enumeration oracle.
   app.post('/password-resets', RequestResetRequest, async (request, reply) => {
     const token = await authService.requestPasswordReset({ email: request.body.email })
-    if (token !== undefined) request.log.info({ token }, 'password reset issued')
+    // Deliver via email (see mailService, wired by the transactional-email slice).
+    // The token is a credential -- it is never logged.
+    if (token !== undefined) {
+      request.log.info({ email: request.body.email }, 'password reset issued')
+      await mailService.sendPasswordReset({ email: request.body.email, token })
+    }
     return reply.status(202).send({ ok: true })
   })
 

@@ -1,19 +1,46 @@
+import sanitizeHtml from 'sanitize-html'
+
 // Blog and comment bodies are user-authored HTML (the legacy editor was TinyMCE).
-// This strips the dangerous surface -- scripts, event handlers, javascript: URLs
-// -- while leaving the formatting the editor produces. It is intentionally a
-// denylist of the things that execute, applied server-side on write, so a stored
-// payload can never run in another user's browser.
-const SCRIPT = /<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi
-const SELF_CLOSING = /<\s*(script|iframe|object|embed|link|meta)\b[^>]*\/?>/gi
-const ON_ATTR = /\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi
-const JS_URL = /\s(href|src)\s*=\s*(["']?)\s*javascript:[^"'>]*\2/gi
+// This is an ALLOWLIST sanitizer, not a denylist: only the formatting tags and
+// attributes the editor actually produces survive; everything else -- scripts,
+// event handlers, javascript:/data: URLs, unknown tags -- is dropped. A
+// hand-rolled regex denylist for HTML is never complete (an independent audit
+// bypassed the previous one with `<img src=x/onerror=...>` and a `javascript:`
+// href), so this defers to the well-tested library.
+const OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
+    'p', 'br', 'span', 'div', 'strong', 'b', 'em', 'i', 'u', 's', 'sub', 'sup',
+    'blockquote', 'pre', 'code', 'hr',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li',
+    'a', 'img',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  ],
+  allowedAttributes: {
+    a: ['href', 'title', 'target', 'rel'],
+    img: ['src', 'alt', 'width', 'height'],
+    '*': ['style'],
+  },
+  // Only these URL schemes survive on href/src -- no javascript:, no data:.
+  allowedSchemes: ['http', 'https', 'mailto'],
+  allowedSchemesAppliedToAttributes: ['href', 'src'],
+  // Constrain inline styles to harmless text formatting.
+  allowedStyles: {
+    '*': {
+      'text-align': [/^(left|right|center|justify)$/],
+      color: [/^#(0x)?[0-9a-f]+$/i, /^rgb\(/i],
+      'background-color': [/^#(0x)?[0-9a-f]+$/i, /^rgb\(/i],
+      'font-weight': [/^(normal|bold|[1-9]00)$/],
+    },
+  },
+  transformTags: {
+    // Any surviving link opens safely.
+    a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer nofollow' }),
+  },
+}
 
 export const sanitize = {
   html(input: string): string {
-    return input
-      .replace(SCRIPT, '')
-      .replace(SELF_CLOSING, '')
-      .replace(ON_ATTR, '')
-      .replace(JS_URL, '')
+    return sanitizeHtml(input, OPTIONS)
   },
 }

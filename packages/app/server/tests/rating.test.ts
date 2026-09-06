@@ -36,19 +36,19 @@ describe('ratingAlgorithm', () => {
   })
 
   it('truncates deltas toward zero, the way Java int division does', () => {
-    // Math.floor would drift by one on every negative delta. With a wide rating
-    // spread the losers' deltas are large and negative, so a floor-based port
-    // lands on different numbers than the recorded history.
+    // trunc(-x.5) = -x, floor(-x.5) = -(x+1): swapping Math.trunc -> Math.floor in
+    // rating.ts shifts these exact deltas to [-71,-16,83], so this pins the
+    // difference the previous Number.isInteger assertion could not see.
     const contestants: Contestant[] = [
-      { userId: 'a', points: 900, rating: 2400 },
-      { userId: 'b', points: 800, rating: 1200 },
-      { userId: 'c', points: 100, rating: 2000 },
-      { userId: 'd', points: 50, rating: 1000 },
+      { userId: 'a', points: 1000, rating: 1501 },
+      { userId: 'b', points: 700, rating: 1499 },
+      { userId: 'c', points: 400, rating: 1503 },
     ]
-    for (const r of ratingAlgorithm.compute({ contestants })) {
-      expect(Number.isInteger(r.delta)).toBe(true)
-      expect(Number.isInteger(r.newRating)).toBe(true)
-    }
+    const deltas = ratingAlgorithm
+      .compute({ contestants })
+      .map((r) => r.delta)
+      .sort((x, y) => x - y)
+    expect(deltas).toEqual([-70, -15, 84])
   })
 
   it('returns nothing for an empty or all-zero contest', () => {
