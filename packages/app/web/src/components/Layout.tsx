@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/lib/auth'
+import { useQuery } from '@tanstack/react-query'
+import { UnreadCountResponse } from '@logicrush/shared'
+import { api } from '@/lib/api'
 
 // The site frame, matched to the live site: logo (emblem + wordmark) on the LEFT,
 // nav on the RIGHT (in RTL that means nav is the first flex child), full-width
@@ -13,6 +16,22 @@ const NAV = [
   { to: '/submissions/page/1', label: 'آخر الإجابات' },
   { to: '/forum', label: 'المنتدى' },
 ]
+
+function NotificationBell() {
+  const { data } = useQuery({
+    queryKey: ['unread-count'],
+    queryFn: () => api.get('/notifications/unread-count', UnreadCountResponse),
+    retry: false,
+    refetchInterval: 60000,
+  })
+  const n = data?.count ?? 0
+  return (
+    <Link to="/notifications" className="relative transition-opacity hover:opacity-80" aria-label="الإشعارات">
+      الإشعارات
+      {n > 0 && <span className="bg-destructive text-destructive-foreground ms-1 rounded-full px-1.5 text-xs">{n}</span>}
+    </Link>
+  )
+}
 
 export function Layout({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuth()
@@ -34,6 +53,7 @@ export function Layout({ children }: { children: ReactNode }) {
               </>
             ) : (
               <>
+                <NotificationBell />
                 <Link to={`/profile/${user.username}`} className="transition-opacity hover:opacity-80">{user.username}</Link>
                 <button onClick={() => void signOut()} className="transition-opacity hover:opacity-80">خروج</button>
               </>

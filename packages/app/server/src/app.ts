@@ -16,6 +16,7 @@ import { authService } from './identity/auth/auth-service.js'
 import { security } from './identity/auth/security.js'
 import { authController } from './identity/auth/auth-controller.js'
 import { userController } from './identity/users/user-controller.js'
+import { notificationController } from './identity/notifications/notification-controller.js'
 import { problemController } from './catalog/problems/problem-controller.js'
 import { tagController } from './catalog/tags/tag-controller.js'
 import { problemAdminController } from './catalog/admin/problem-admin-controller.js'
@@ -68,6 +69,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     async (api) => {
       await api.register(authController)
       await api.register(userController)
+      await api.register(notificationController)
       await api.register(problemController)
       await api.register(tagController)
       await api.register(problemAdminController)

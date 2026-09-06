@@ -41,3 +41,17 @@ export const LeaderboardQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(50),
 })
+
+export const NotificationSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  link: z.string().nullable(),
+  read: z.boolean(),
+  createdAt: z.iso.datetime(),
+})
+export const NotificationListResponse = z.object({
+  items: z.array(NotificationSchema),
+  page: z.number().int(),
+  pageSize: z.number().int(),
+})
+export const UnreadCountResponse = z.object({ count: z.number().int() })
