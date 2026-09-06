@@ -11,7 +11,8 @@
     "typecheck": "npm -w @logicrush/shared run build && npm -w @logicrush/server run typecheck && npm -w @logicrush/web run typecheck",
     "test": "npm run lint:deps && npm run check:structure && npm -w @logicrush/shared run build && npm -w @logicrush/server test && npm -w @logicrush/web test",
     "db:migrate": "npm -w @logicrush/server run db:migrate",
-    "test:e2e": "playwright test --config playwright/playwright.config.ts"
+    "test:e2e": "playwright test --config playwright/playwright.config.ts",
+    "test:e2e:seed": "npm -w @logicrush/server run db:migrate && npm -w @logicrush/server run db:seed"
   },
   "workspaces": [
     "packages/shared",
