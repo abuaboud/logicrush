@@ -26,6 +26,8 @@ const RANK: Record<Role, number> = { user: 0, setter: 1, admin: 2 }
 
 export const security = {
   async authorize(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
+    // Static uploads are public files, not API routes -- never gated.
+    if (request.url.startsWith('/uploads/')) return
     const access = request.routeOptions.config.security ?? 'authenticated'
     if (access === 'public') return
 

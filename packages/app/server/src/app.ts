@@ -2,6 +2,8 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import cors from '@fastify/cors'
 import cookie from '@fastify/cookie'
 import rateLimit from '@fastify/rate-limit'
+import multipart from '@fastify/multipart'
+import fastifyStatic from '@fastify/static'
 import {
   serializerCompiler,
   validatorCompiler,
@@ -11,12 +13,14 @@ import { z } from 'zod'
 import { AppError, ErrorCode } from '@logicrush/shared'
 import { configs } from './configs.js'
 import { databaseService } from './infra/database.js'
+import { UPLOAD_DIR } from './infra/uploads.js'
 import { clock } from './infra/clock.js'
 import { authService } from './identity/auth/auth-service.js'
 import { security } from './identity/auth/security.js'
 import { authController } from './identity/auth/auth-controller.js'
 import { userController } from './identity/users/user-controller.js'
 import { notificationController } from './identity/notifications/notification-controller.js'
+import { uploadController } from './identity/users/upload-controller.js'
 import { problemController } from './catalog/problems/problem-controller.js'
 import { tagController } from './catalog/tags/tag-controller.js'
 import { problemAdminController } from './catalog/admin/problem-admin-controller.js'
@@ -37,6 +41,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(cors, { origin: configs.frontendUrl, credentials: true })
   await app.register(cookie, { secret: configs.authSecret })
   await app.register(rateLimit, { max: 600, timeWindow: '1 minute' })
+  await app.register(multipart, { limits: { fileSize: 2 * 1024 * 1024 } })
+  await app.register(fastifyStatic, { root: UPLOAD_DIR, prefix: '/uploads/', decorateReply: false })
 
   // Resolve the principal from the session cookie on every request, then enforce
   // the route's declared access. Two hooks, one place -- handlers never re-derive
@@ -70,6 +76,7 @@ export async function buildApp(): Promise<FastifyInstance> {
       await api.register(authController)
       await api.register(userController)
       await api.register(notificationController)
+      await api.register(uploadController)
       await api.register(problemController)
       await api.register(tagController)
       await api.register(problemAdminController)

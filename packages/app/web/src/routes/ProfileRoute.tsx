@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { Card, CardHeader, CardBody } from '@/components/ui/card'
 import { Username } from '@/components/Username'
+import { useAuth } from '@/lib/auth'
+import { useQueryClient } from '@tanstack/react-query'
 
 // The profile aggregate isn't a single shared schema (it composes several), so
 // this reads it untyped from the same endpoint the server serialises.
@@ -18,6 +20,7 @@ export function ProfileRoute() {
       <Card>
         <CardHeader>الملف الشخصي</CardHeader>
         <CardBody className="flex items-center gap-4">
+          <Avatar imgUrl={u.imgUrl} username={u.username} />
           <div>
             <div className="text-xl"><Username name={u.username} color={u.bandColor} /></div>
             <div className="text-muted-foreground">{u.fullName}</div>
@@ -79,5 +82,28 @@ function RatingGraph({ points }: { points: { newRating: number; contestTitle: st
       <path d={d} fill="none" stroke="#06458b" strokeWidth={2} />
       {points.map((p, i) => <circle key={i} cx={x(i)} cy={y(p.newRating)} r={3} fill="#06458b" />)}
     </svg>
+  )
+}
+
+
+function Avatar({ imgUrl, username }: { imgUrl: string | null; username: string }) {
+  const { user } = useAuth()
+  const qc = useQueryClient()
+  const own = user?.username === username
+  async function upload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file === undefined) return
+    const body = new FormData()
+    body.append('file', file)
+    await fetch('/api/users/me/avatar', { method: 'PUT', credentials: 'include', body })
+    qc.invalidateQueries({ queryKey: ['profile', username] })
+  }
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="bg-muted h-20 w-20 overflow-hidden rounded-full">
+        {imgUrl !== null ? <img src={imgUrl} alt={username} className="h-full w-full object-cover" /> : null}
+      </div>
+      {own ? <label className="text-brand-light cursor-pointer text-xs">تغيير الصورة<input type="file" accept="image/*" className="hidden" onChange={upload} /></label> : null}
+    </div>
   )
 }
