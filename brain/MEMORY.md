@@ -1,5 +1,7 @@
 # MEMORY
 
+- **2026-09-06** — Rebuild feature-complete + real prod data migrated + verified; a final independent verifier caught that "API built" != "feature usable" (the in-contest UI was missing though its API was done) — always verify against the live product, not the endpoint list. Deploying to beta.logicrush.com on the same server next.
+
 Dated one-off notes that have not earned their own page.
 
 - **2026-09-06** — An independent audit of the issue set found the scoring formula
