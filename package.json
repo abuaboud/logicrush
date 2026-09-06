@@ -10,7 +10,8 @@
     "check:structure": "node scripts/check-structure.mjs",
     "typecheck": "npm -w @logicrush/shared run build && npm -w @logicrush/server run typecheck && npm -w @logicrush/web run typecheck",
     "test": "npm run lint:deps && npm run check:structure && npm -w @logicrush/shared run build && npm -w @logicrush/server test && npm -w @logicrush/web test",
-    "db:migrate": "npm -w @logicrush/server run db:migrate"
+    "db:migrate": "npm -w @logicrush/server run db:migrate",
+    "test:e2e": "playwright test --config playwright/playwright.config.ts"
   },
   "workspaces": [
     "packages/shared",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "concurrently": "^9.0.0",
     "dependency-cruiser": "^18.1.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "@playwright/test": "^1.50.0"
   }
 }
