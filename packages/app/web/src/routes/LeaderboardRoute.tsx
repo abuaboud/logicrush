@@ -14,10 +14,10 @@ export function LeaderboardRoute() {
   })
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold">قائمة المتصدرين</h1>
-      <DataTable head={<><Th className="w-16">#</Th><Th>المستخدم</Th><Th className="text-end">التقييم</Th></>}>
+      <h1 className="mb-4 text-2xl font-bold">لوحة المتصدرين</h1>
+      <DataTable head={<><Th className="w-16">#</Th><Th>الأسم</Th><Th className="text-end">التقييم</Th></>}>
         {(data?.items ?? []).map((u) => (
-          <tr key={u.username} className="hover:bg-muted/50">
+          <tr key={u.username} className="odd:bg-muted/40 hover:bg-muted/60">
             <Td className="text-muted-foreground">{u.rank}</Td>
             <Td><Username name={u.username} color={u.bandColor} /></Td>
             <Td className="text-end tabular-nums">{u.rating}</Td>

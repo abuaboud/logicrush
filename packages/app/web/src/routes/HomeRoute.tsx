@@ -16,7 +16,8 @@ export function HomeRoute() {
           <Card key={a.id}>
             <CardHeader>معلومات هامة</CardHeader>
             <CardBody>
-              <h2 className="mb-2 text-lg font-bold">{a.title}</h2>
+              <Link to={`/blog/${a.id}`} className="text-brand-light mb-1 block text-lg font-bold hover:underline">{a.title}</Link>
+              <div className="text-muted-foreground mb-3 text-xs">{new Date(a.createdAt).toLocaleString('en-US')} - {a.author}</div>
               <div className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: a.content }} />
             </CardBody>
           </Card>
