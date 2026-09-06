@@ -131,11 +131,17 @@ parity, the `author_id=0` system-user fallback, case-collision user dedup, and t
 zero-date `birthday` serialization crash (would have 500'd every authenticated
 request) — all regression-tested.
 
-**Remaining (lower-visibility or needs a decision):**
-- #40 notifications UI, #41 badges on profile, #38 image-upload UI, #39 real email
-  templates — backend seams exist; UI/templates pending.
-- #45 SEO meta tags; #50–#58 Playwright journey bodies (harness scaffolded).
-- #46 deployment and #47 cutover — need your call on hosting/timing (the rebuild
-  can be deployed to the server via the SSH access now in place).
+**Also completed since:** badges on profile (#41), notifications with bell (#40),
+admin dashboards (#42/#43), SEO sitemap+robots+titles (#45), legacy URL
+completeness incl. /terms and email-link routes (#44), and the E2E harness with the
+browse (#51) and legacy-URL (#57) journeys green (#50). 26 server tests + 17 E2E
+checks passing.
+
+**Genuinely remaining:**
+- #38 image-upload UI and #39 real email templates — backend seams exist (magic-byte
+  validation, mail-service that suppresses without a key); UI/templates pending.
+- #52–#56, #58 — the auth/contest-clock E2E journey bodies (harness + 2 journeys done).
+- #46 deployment and #47 cutover — need your decision on hosting/timing. SSH access
+  to the server is in place, so the rebuild can be deployed on your go-ahead.
 - One scoring tie-break (±≤2 positions in 1 of 26 contests) if exact historical
-  rank parity is required.
+  rank parity is ever required.
